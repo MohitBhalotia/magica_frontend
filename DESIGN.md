@@ -213,6 +213,16 @@ The reference mixes **Lucide** (most icons) and **Tabler** (a few). Default size
 - **Loading:** grey skeleton bars, about 10 rows of varying widths.
 - **Footer:** a divider, then "⋮ More", then the user button (avatar circle + name). Signed out, there is a "Magica 101" card, "Claim Offer" and "Sign in".
   - **[Observed 2026-10-18]** Only "More" and the user button are visible. Available Credits (link to `/usage`), Add Credits, Settings, Updates, "Invite team members" and the System / Light / Dark theme tabs live inside the **More** menu.
+  - **[Observed 2026-10-18] "More" expands inline** (not a dropdown); the row reads **"Less"** while open (lucide `ellipsis-vertical`, 14px weight 400). Panel, top to bottom:
+    - "Available Credits" (12px) with the value right-aligned (12px/500 `--text-secondary`, tabular).
+    - "Add Credits": h32, radius 10, dark gradient, 12px/500, lucide `wallet`, shadow `0 0 0 1px #303030, inset 0 1px 0 rgba(255,255,255,.15), 0 1px 3px rgba(0,0,0,.2)`.
+    - "Settings" (lucide `settings`) and "Updates" (lucide `sparkles`): two outlined h28 buttons, gap 8.
+    - "Invite team members": outlined 34px row, lucide `users` and `arrow-right`.
+    - Theme tabs: h32 pill, 1px border, padding 2; tabs are h24 with 14px lucide `laptop` / `sun` / `moon` (aria "System theme" / "Light theme" / "Dark theme"); a sliding `--magica-foundation-surface-hover` indicator moves over 200ms.
+  - User button: Clerk trigger, full width, 34px; avatar on the left, name right-aligned (13px/500).
+- **Logo [Observed 2026-10-18]:** `/magica.png` at 80×20 (`object-contain object-left`, `dark:invert`). The rail mark is `/magica_logo_collapsed_{light,dark}.svg` at 18×13, which fades to tabler `layout-sidebar` on hover. Both are copied to `public/`.
+- **Header controls [Observed 2026-10-18]:** the logo button is "Start a new task"; the icon buttons are "Search" and "Close sidebar" (28px, round, 2px gap).
+- **Collapsed rail [Observed 2026-10-18]:** 48px wide. "Open sidebar" (logo mark, 34px), then Search (28px, 16px below), then New task and the 7 nav items as 34px icon buttons with 4px gaps; "Settings" (32px) sits at the bottom. No task list and no footer.
 
 ### 3.3 Top bar [Observed]
 - **Left:** model selector button (28px), with a small black rounded-square logo, the model name (14px/500) and a chevron-down. It is **disabled and dimmed** while a run is active.

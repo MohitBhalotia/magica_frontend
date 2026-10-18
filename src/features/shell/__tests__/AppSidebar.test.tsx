@@ -6,7 +6,7 @@ import { AppSidebar } from "@/features/shell/AppSidebar";
 import { useUiStore } from "@/stores/uiStore";
 
 beforeEach(() => {
-  useUiStore.setState({ drawerOpen: false });
+  useUiStore.setState({ drawerOpen: false, sidebarCollapsed: false });
 });
 
 it("shows the drawer when the store opens it, and Esc closes it", async () => {
@@ -20,4 +20,15 @@ it("shows the drawer when the store opens it, and Esc closes it", async () => {
 
   await userEvent.keyboard("{Escape}");
   expect(useUiStore.getState().drawerOpen).toBe(false);
+});
+
+it("collapses to the rail and opens again", async () => {
+  render(<AppSidebar />);
+
+  await userEvent.click(screen.getByRole("button", { name: "Close sidebar" }));
+  expect(useUiStore.getState().sidebarCollapsed).toBe(true);
+  expect(screen.queryByRole("button", { name: "Close sidebar" })).not.toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole("button", { name: "Open sidebar" }));
+  expect(useUiStore.getState().sidebarCollapsed).toBe(false);
 });

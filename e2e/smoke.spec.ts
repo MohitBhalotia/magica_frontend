@@ -4,7 +4,7 @@ test("/ redirects to the chat shell with Clerk sign-in", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/chat$/);
   await expect(page.getByRole("heading", { name: "Your AI worker" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /sign in/i })).toBeVisible();
+  await expect(page.getByRole("banner").getByRole("button", { name: /sign in/i })).toBeVisible();
 });
 
 test("mobile: the sidebar opens as a drawer", async ({ page }) => {
