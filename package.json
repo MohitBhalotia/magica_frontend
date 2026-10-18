@@ -29,9 +29,13 @@
     "*.{json,yaml,yml,css}": "prettier --write"
   },
   "dependencies": {
+    "@agent-chat/contracts": "link:../magica_backend/packages/contracts",
+    "@clerk/nextjs": "7.9.15",
+    "@tanstack/react-query": "5.104.3",
     "next": "16.4.2",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.3",

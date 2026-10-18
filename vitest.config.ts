@@ -9,6 +9,10 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
+    env: {
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_dummy",
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:4000",
+    },
     include: ["src/**/__tests__/**/*.test.{ts,tsx}"],
     coverage: {
       provider: "v8",
