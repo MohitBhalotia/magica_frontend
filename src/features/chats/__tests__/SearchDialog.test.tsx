@@ -7,6 +7,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 import type { ChatSummary } from "@mohitbhalotia/magica-contracts";
 
 import { SearchDialog } from "@/features/chats/SearchDialog";
+import { Shortcuts } from "@/features/shell/Shortcuts";
 import { server } from "@/mocks/server";
 import { useUiStore } from "@/stores/uiStore";
 import { API, renderWithProviders } from "@/test/render";
@@ -56,7 +57,12 @@ const options = () =>
   within(screen.getByRole("listbox", { name: "Suggestions" })).getAllByRole("option");
 
 it("Ctrl+K opens it with recent tasks; Esc closes it", async () => {
-  renderWithProviders(<SearchDialog />);
+  renderWithProviders(
+    <>
+      <SearchDialog />
+      <Shortcuts />
+    </>,
+  );
   await userEvent.keyboard("{Control>}k{/Control}");
 
   expect(await screen.findByRole("dialog", { name: "Search tasks" })).toBeInTheDocument();

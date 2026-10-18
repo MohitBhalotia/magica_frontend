@@ -58,6 +58,11 @@ Object.assign(Element.prototype, {
   releasePointerCapture: () => undefined,
   scrollIntoView: () => undefined,
 });
+// jsdom has no media playback (idea-card previews play on hover).
+Object.assign(HTMLMediaElement.prototype, {
+  play: () => Promise.resolve(),
+  pause: () => undefined,
+});
 
 // Any request a test didn't mock fails loudly instead of hitting a real API.
 beforeAll(() => {

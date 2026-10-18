@@ -1,4 +1,4 @@
-# DESIGN.md — Agent Chat UI
+# DESIGN.md — Magica UI
 
 The design system and UI behaviour spec for `magica_frontend`. Its goal is **pixel parity with the reference product**
 (https://app.magica.com/chat, which `app.galaxy.ai/chat` redirects to). The brief says: *"When unsure, match the reference exactly rather than re-designing."*
@@ -304,7 +304,11 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 - **Idea cards:** masonry, 3 columns on desktop and 2 on mobile. Media thumbnail, radius 12, with the title at the bottom on a white fade.
   - Clicking a card **fills the composer** and doesn't send.
   - "See more ideas" button at the end.
-- **Data [Decision]:** a static JSON of ~12 ideas with our own thumbnails, all achievable with our 3 tools. The reference's video-template ideas need tools we don't have, so we mirror the layout, not the content.
+- **Data (user call, 2026-10-18; replaces our own 12 ideas):**
+  - The reference's own 30 "All" ideas (title, prompt, tabs, media) were captured read-only into `src/features/ideas/ideas.json` and Zod-checked at load.
+  - Media comes from the reference's public CDN (`g.tlcdn.com`, `galaxyai.tlcdn.com`). Videos use `preload="none"`, are muted and looping, and play only while hovered or focused (unless reduced motion). Images go through `next/image`.
+  - Tabs filter those 30, so most tabs show a few cards (the reference loads 22–30 per tab from its server). "See more ideas" shows the not-available toast.
+  - Many prompts ask for video models we don't have (Seedance, Kling); the agent will explain what it can do instead.
 - **[Observed 2026-10-18] Exact values:**
   - **Hero:** a 448-wide stack, padding-top 113 (40 on mobile), 40px mascot.
   - **Time:** 13px/500, `--text-secondary`, tracking .01em, margin-top 19 (14 on mobile). "PM" is caption-1, shifted by (−3px, −5px). Formatted en-US 12-hour on every locale.
@@ -313,7 +317,7 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
   - **Tabs:** h34, px10, radius 10, 14/500, spread `justify-between` across 900, scrolling sideways on narrow screens. The active tab is `--surface-secondary` with foreground text.
   - **Cards:** radius 16, 1px `--boarder-secondary`, `--surface-main-background-2`, `shadow-xs`. Media on top, then a title footer (px8, pt4, pb8, 14/500, one line). Three columns with a 16px gap (two columns, 12px gap, on mobile).
   - **"See more ideas":** h36, px12, radius 10, 1px border, `--surface-main-background-3`, `shadow-xs`, margin-top 32.
-- **Ours:** gradient placeholder thumbnails, 9 ideas shown, then "See more ideas" shows the rest. Clicking a card sets the new-chat draft in `composerStore`.
+- **Ours:** all 30 ideas shown at once. Clicking a card sets the new-chat draft in `composerStore`. CSS columns balance the masonry slightly differently from the reference (its third column starts one card earlier).
 
 ### 4.5 Messages [Observed]
 - **User message:**
@@ -472,7 +476,7 @@ On send from the empty state:
 2. Within about a second it becomes the truncated first prompt.
 3. After the first turn it becomes the AI title.
 
-The URL changes to `/chat/<id>` without a full reload, and the document title becomes `<title> | Magica`. **[Decision]** Ours is `<title> | Agent Chat`.
+The URL changes to `/chat/<id>` without a full reload, and the document title becomes `<title> | Magica`. Ours matches: "Magica" by default, `<title> | Magica` on a chat, with the reference favicon (user call, 2026-10-18).
 
 ### 5.3 Keyboard [Observed + Decision]
 | Keys | Action |

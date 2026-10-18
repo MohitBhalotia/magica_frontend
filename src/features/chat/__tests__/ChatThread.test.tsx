@@ -49,6 +49,7 @@ it("shows the messages oldest first", async () => {
 
   const log = await screen.findByRole("log", { name: "Chat messages" });
   expect(log.textContent).toBe("first\nline twosecond");
+  expect(document.title).toBe("Logo | Magica");
 });
 
 it("a missing or foreign chat shows Task not found with a way out", async () => {

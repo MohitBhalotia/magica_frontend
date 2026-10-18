@@ -66,25 +66,29 @@ export function ChatThread({ id }: { id: string }) {
           </div>
         ) : (
           // The API pages newest first; the thread reads oldest first.
-          <ol
-            role="log"
-            aria-label="Chat messages"
-            className={`${COLUMN} flex flex-col gap-space-07 py-space-07`}
-          >
-            {[...data.messages.items].reverse().map((m) =>
-              m.role === "user" ? (
-                <li key={m.id} className="flex justify-end">
-                  <p className="max-w-md rounded-radius-xxl bg-user-message px-space-05 py-[6px] text-small break-words whitespace-pre-wrap text-text-primary">
+          <>
+            {/* React 19 hoists <title> into <head>: the tab shows the chat (DESIGN §5.2). */}
+            <title>{`${data.title} | Magica`}</title>
+            <ol
+              role="log"
+              aria-label="Chat messages"
+              className={`${COLUMN} flex flex-col gap-space-07 py-space-07`}
+            >
+              {[...data.messages.items].reverse().map((m) =>
+                m.role === "user" ? (
+                  <li key={m.id} className="flex justify-end">
+                    <p className="max-w-md rounded-radius-xxl bg-user-message px-space-05 py-[6px] text-small break-words whitespace-pre-wrap text-text-primary">
+                      {m.text}
+                    </p>
+                  </li>
+                ) : (
+                  <li key={m.id} className="text-body whitespace-pre-wrap text-text-primary">
                     {m.text}
-                  </p>
-                </li>
-              ) : (
-                <li key={m.id} className="text-body whitespace-pre-wrap text-text-primary">
-                  {m.text}
-                </li>
-              ),
-            )}
-          </ol>
+                  </li>
+                ),
+              )}
+            </ol>
+          </>
         )}
       </Show>
     </>

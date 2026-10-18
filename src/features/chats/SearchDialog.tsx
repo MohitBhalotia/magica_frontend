@@ -28,24 +28,10 @@ function Highlight({ text, q }: { text: string; q: string }): ReactNode {
   );
 }
 
-/** ⌘/Ctrl+K task search (DESIGN §4.10, observed 2026-10-18). */
+/** Task search (DESIGN §4.10, observed 2026-10-18); ⌘/Ctrl+K opens it (see Shortcuts). */
 export function SearchDialog() {
   const open = useUiStore((s) => s.searchOpen);
   const setOpen = useUiStore((s) => s.setSearchOpen);
-
-  // ⌘K on macOS, Ctrl+K elsewhere; toggles like the reference.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey) && !e.shiftKey) {
-        e.preventDefault();
-        setOpen(!useUiStore.getState().searchOpen);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [setOpen]);
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
