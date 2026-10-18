@@ -6,7 +6,7 @@ import { afterAll, afterEach, beforeAll, vi } from "vitest";
 import { server } from "@/mocks/server";
 
 // App Router and Clerk need their providers; components only touch these hooks. Tests assert
-// on `router` from @/test/router. Clerk renders the signed-out branch.
+// on `router` from @/test/router. Clerk is signed out unless a test mocks `useAuth`.
 vi.mock("next/navigation", async () => {
   // vi.mock is hoisted above static imports, so load the shared router here.
   const { router } = await import("@/test/router");
@@ -14,16 +14,18 @@ vi.mock("next/navigation", async () => {
 });
 vi.mock("@clerk/nextjs", async () => {
   const { clerk } = await import("@/test/clerk");
+  // Signed out by default; tests override with vi.mocked(useAuth).mockReturnValue(...).
+  const useAuth = vi.fn(() => ({
+    isSignedIn: false,
+    userId: null as string | null,
+    getToken: () => Promise.resolve(null as string | null),
+  }));
   return {
-    // Signed out by default; list tests override with vi.mocked(useAuth).mockReturnValue(...).
-    useAuth: vi.fn(() => ({
-      isSignedIn: false,
-      userId: null,
-      getToken: () => Promise.resolve(null),
-    })),
+    useAuth,
     useClerk: () => clerk,
+    // Follows the mocked useAuth, like the real <Show>.
     Show: ({ when, children }: { when: string; children: ReactNode }) =>
-      when === "signed-out" ? children : null,
+      (when === "signed-in") === useAuth().isSignedIn ? children : null,
     SignInButton: ({ children }: { children?: ReactNode }) => children,
     SignUpButton: ({ children }: { children?: ReactNode }) => children,
     UserButton: () => null,

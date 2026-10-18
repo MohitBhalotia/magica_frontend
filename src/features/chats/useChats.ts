@@ -4,6 +4,7 @@ import { useAuth } from "@clerk/nextjs";
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
   type InfiniteData,
 } from "@tanstack/react-query";
@@ -20,6 +21,7 @@ import {
   createChat,
   deleteChat,
   duplicateChat,
+  getChat,
   listChats,
   updateChat,
 } from "@/services/chats.service";
@@ -45,6 +47,17 @@ export function useChatList() {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
     enabled: isSignedIn === true,
+  });
+}
+
+/** One chat with its newest messages. A 404 is final, so it isn't retried. */
+export function useChat(id: string) {
+  const { isSignedIn, userId, getToken } = useAuth();
+  return useQuery({
+    queryKey: ["chat", userId, id],
+    queryFn: async () => getChat(id, await getToken()),
+    enabled: isSignedIn === true,
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 3,
   });
 }
 

@@ -329,6 +329,12 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
   - Action row, 28px ghost icons: Copy, Fork chat (out of scope → toast), Good response, Bad response, then the time "12:40 PM" (caption).
 - **Spacing:** ~24px between messages; 40px between a user message and the assistant turn **[Observed approx.]**.
 - **Entry animation:** `chat-fade-in-up` at 200ms.
+- **Chat page states [Decision, not observed]:** our reference session expired before we could check these.
+  - Loading: one bubble-shaped skeleton.
+  - Missing, deleted or someone else's chat (all 404): "Task not found" / "It may have been deleted, or the link is wrong." with a "New task" pill.
+  - Other errors: "Couldn't load this task" with the safe API message.
+  - Signed out: "Sign in to see this task" with a Sign in pill.
+  - `/chat/a/b` renders the not-found page. Under partial prerender the status stays 200 and the page is noindex.
 
 ### 4.6 Step group & step rows — core streaming UI [Observed]
 **Group header** (14/20, `--text-secondary`, hover `--text-primary`, with a chevron-down 12px):

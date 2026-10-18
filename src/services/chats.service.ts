@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  ChatDetailSchema,
   ChatListSchema,
   ChatSummarySchema,
   CreateChatResponseSchema,
@@ -17,6 +18,10 @@ export const listChats = (cursor: string | undefined, token: Token) =>
   request(`/api/v1/chats${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`, ChatListSchema, {
     token,
   });
+
+/** The chat plus its newest messages (newest first). Not yours or deleted → 404 NOT_FOUND. */
+export const getChat = (id: string, token: Token) =>
+  request(chatPath(id), ChatDetailSchema, { token });
 
 /** Idempotent: resending the same clientMessageId returns the same chat. */
 export const createChat = (body: CreateChatRequest, token: Token) =>
