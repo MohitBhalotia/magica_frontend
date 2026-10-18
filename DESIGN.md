@@ -195,25 +195,32 @@ The reference mixes **Lucide** (most icons) and **Tabler** (a few). Default size
 - **Composer gutter:**
   - Width is `calc(100% − gutter)`, where the gutter is 1rem below `sm`, 2rem from `sm`, 3rem from `md`, and auto-centred at max 900 from `lg`.
   - The wrapper uses `pt-2 pb-1 lg:px-8`.
-- **Breakpoints [Decision]:** Tailwind defaults (`sm` 640, `md` 768, `lg` 1024). The sidebar becomes an off-canvas drawer below `lg` **[TBV] exact breakpoint and the drawer trigger**.
+- **Breakpoints:** Tailwind defaults (`sm` 640, `md` 768, `lg` 1024). **[Observed 2026-10-18]** The sidebar is inline from **`md` (768px)** up and becomes an off-canvas drawer below it.
+  - **Drawer trigger:** an "Open sidebar" icon button (tabler `layout-sidebar`) at the far left of the top bar, before the model selector.
+  - **Drawer:** the same sidebar card (`--surface-main-background-2`, radius 24), full-width on phones, over a fixed backdrop `--surface-overlay-control` (`rgba(10,10,11,.5)`) with `backdrop-blur-[3px]`, z-40. Esc closes it.
+  - On touch widths the task-row "…" buttons are always visible (no hover).
 
 ### 3.2 Sidebar [Observed]
 - **Header (52):** logo (80×20), plus Search and Collapse icon buttons on the right (28px controls).
-- **"New task" row:** 34px, radius 10, 14px weight 500 `--text-secondary`, padding `0 8px`, with a `Ctrl+Shift+O` keycap on the right that shows on hover **[TBV]**.
+- **"New task" row:** 34px, radius 10, 14px weight 500 `--text-secondary`, padding `0 8px`, with a `Ctrl+Shift+O` keycap on the right that **shows on hover only** (`opacity-0 group-hover:opacity-100`, 150ms `cubic-bezier(0.4,0,0.2,1)`; keycap text `--text-primary`) **[Observed 2026-10-18]**. Row hover background `--surface-secondary`.
 - **Nav rows:** same row spec, 16px icon with a 10px gap. Hover background `--surface-secondary`; hovered text becomes `--text-primary`.
 - **"Recent tasks":**
   - Caption-size header (12px, `--text-tertiary`) with a chevron that appears on hover, and "View all" on the right.
   - Task rows: 34px, truncated, `pl-8 pr-8`; the right padding grows to 40 on hover to make room for the "…" button (24px, radius 4).
   - Active row: background `--surface-tertiary`, rounded, with `aria-current="page"`.
+- **Pinned [Observed 2026-10-18]:** pinned chats move into their own **"Pinned tasks"** section above "Recent tasks" (same caption header style; the section disappears when nothing is pinned). Rows look identical to recent rows — no pin icon. Pinning or unpinning does not reorder chats by activity.
 - **Empty list:** centred "No tasks yet" (14px, `--text-secondary`).
 - **Loading:** grey skeleton bars, about 10 rows of varying widths.
 - **Footer:** a divider, then "⋮ More", then the user button (avatar circle + name). Signed out, there is a "Magica 101" card, "Claim Offer" and "Sign in".
+  - **[Observed 2026-10-18]** Only "More" and the user button are visible. Available Credits (link to `/usage`), Add Credits, Settings, Updates, "Invite team members" and the System / Light / Dark theme tabs live inside the **More** menu.
 
 ### 3.3 Top bar [Observed]
 - **Left:** model selector button (28px), with a small black rounded-square logo, the model name (14px/500) and a chevron-down. It is **disabled and dimmed** while a run is active.
 - **Right:**
   - Files button: 36px circle, `--surface-primary`, tabler folder-open.
   - Credits pill: 32px, radius max, sparkle icon and `29.95M` (14px/500).
+  - **[Observed 2026-10-18]** The reference now shows a dark **"Computer"** pill (lucide `monitor`, aria "Open computer"; icon-only on mobile) in place of the files button. It is a reference feature outside our brief's tool surface → render it inert ("Not available in this build"), or keep our files button; logged in PRD §14.
+  - The model button reads "Magica Auto" in the reference; ours reads "OpenRouter Free" (§4.3).
 - **Signed out:** a centre "Magica 101" pill, plus "Sign in" (ghost) and "Sign up" (black pill, h32, px12, `shadow-sm`).
 
 ---
@@ -238,13 +245,14 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 - **Container:**
   - Radius 24, padding `16 16 12`, min height 132.
   - Background: a gradient `from-surface-primary to-surface-main-background` (top to bottom). Dark mode uses a flat `--surface-main-background-3`.
-  - No shadow and no border **[TBV] focus state**.
+  - No shadow and no border. **Focus: no visual change** — the container keeps the same border, shadow and background; only the caret (`--text-primary`) appears **[Observed 2026-10-18]**.
 - **Textarea:** 14/24, transparent background, auto-grow up to 200px then scroll, placeholder colour `--text-tertiary`.
   - Empty state: "Assign a task or ask anything..."
   - In a thread: "Send a message..."
 - **Action row:**
-  - Left: Attach (paperclip) and Connect apps (plug rotated −45°), 32px ghost icon buttons.
-  - Right: Dictation (mic) and the Send / Stop button (28px circle).
+  - Left: Attach (lucide `paperclip`) and Connect apps (tabler `plug` rotated −45°), 32px ghost icon buttons.
+  - Right: Dictation (lucide `mic`) and the Send / Stop button (28px circle).
+  - **[Observed 2026-10-18]** The reference added **"Choose project"** (lucide `folder`) between Attach and Connect apps; it shows the icon plus the label "Choose project" (desktop and mobile). Projects are out of scope → inert with the "Coming soon" tooltip, like Connect apps.
 - **Send states:**
 
 | State | Look | Behaviour |
@@ -362,13 +370,18 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
   - Plan label "HOBBY" (caption caps, 600), then "Available Credits" with the balance (16px/700).
   - Primary "Add Credits" (full width, h40), a caption-caps "EXPLORE PLANS" section, a "Compare plans / Find the right plan for you ↗" card, and chips "View usage" and "Billing details".
 - **Task row menu:**
-  - About 180px wide, radius 12, `shadow-lg`, item h34 with radius 8, icon 14px.
-  - Items: Pin to top, Rename, Duplicate, Add to project ›, Delete (danger).
+  - **[Observed 2026-10-18]** 180px wide, radius 10, padding 5, white, shadow `0 4px 12px rgba(0,0,0,.14)`. Items h32, radius 8, padding `0 9px`, gap 8, 14px `#5e5e5e` (the focused item is `--text-primary`); icons 16px at stroke 1.5.
+  - Items: **Pin to top** (tabler `pin`) — or **Unpin** (tabler `pinned-off`) when pinned — **Rename** (tabler `pencil`), **Duplicate** (tabler `copy`), **Add to project** (lucide `folder-input`, ›), **Delete** (tabler `trash`, `#dc2626`).
 - **Tooltip:** `#1b1b1b` background, white 10.5px text, radius 6, padding 4×8. Keycaps are 18px with radius 5 at `rgba(255,255,255,.15)` **[TBV]**.
 
-### 4.10 Search dialog (⌘/Ctrl+K) [Observed sizes · TBV content]
-- 512 × 370: header 44 (input with search icon), results 270, footer 48 (keycap hints such as `Esc` in a 29px keycap). Action gap 6.
-- Result row and snippet highlight **[TBV]**.
+### 4.10 Search dialog (⌘/Ctrl+K) [Observed 2026-10-18]
+- **Dialog:** 512 × 370, white, radius 24, Tailwind `shadow-lg` (`0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1)`). Accessible name "Search tasks", description "Search your recent tasks and open an existing task or start a new one."
+- **Header (44):** lucide `search` icon, input (14px, h40, placeholder **"Search"**, aria "Search projects and tasks"), and an `esc` keycap button (aria "Close") on the right.
+- **Results panel:** a `--surface-primary` rounded panel (radius ~16) holding a listbox "Suggestions" with a caption group label **"Tasks"**.
+  - **Row:** h40, pill (radius 999), px 16, 14px `--text-secondary`, lucide `message-circle` at the compact icon size; the **selected/hovered row is white** (`--surface-main-background`). Shows the **title only**, with the matched text in **bold** (`font-weight: 700`) — no snippet line.
+  - Empty query lists recent tasks. After results: centred caption **"End of search results"** (`--text-secondary`).
+- **Footer (48):** right-aligned "New task" with keycaps `Ctrl` `Shift` `O`.
+- ↑/↓ move the selection, Enter opens, Esc closes.
 
 ### 4.11 Approval / waitpoint overlay [TBV — not observed]
 **[Decision]**, until verified against the reference:
@@ -467,9 +480,11 @@ The URL changes to `/chat/<id>` without a full reload, and the document title be
 - [ ] Insufficient-credits copy and placement
 - [ ] Attachment chips in the composer and on user messages
 - [ ] Video and audio result cards
-- [ ] Search dialog results UI
-- [ ] Mobile thread, drawer trigger and breakpoint
+- [x] Search dialog results UI (2026-10-18, §4.10)
+- [x] Mobile drawer trigger and breakpoint (2026-10-18, §3.1) — mobile *thread* still open (M2)
 - [ ] Dark-mode thread
-- [ ] Composer focus state
+- [x] Composer focus state (2026-10-18, §4.2)
+- [x] New-task keycap on hover; paperclip/mic icon names (2026-10-18, §3.2, §4.2)
+- [x] Pinned-row styling: separate "Pinned tasks" section (2026-10-18, §3.2); row menu values (§4.9)
 - [ ] Files modal radius and empty state
 - [ ] Credit rounding rules
