@@ -258,6 +258,11 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
   - Radius 24, padding `16 16 12`, min height 132.
   - Background: a gradient `from-surface-primary to-surface-main-background` (top to bottom). Dark mode uses a flat `--surface-main-background-3`.
   - No shadow and no border. **Focus: no visual change** — the container keeps the same border, shadow and background; only the caret (`--text-primary`) appears **[Observed 2026-10-18]**.
+  - **Edge [Observed 2026-10-18]:** an absolutely-positioned overlay draws an inset 1px ring, `--boarder-secondary` (#dedede), darkening to `--boarder-primary` (#bdbdbd) when the composer is hovered (150ms).
+  - **Buttons [Observed 2026-10-18]:** all action buttons, Send included, are 32px circles.
+    - Empty Send: `--surface-main-background-2`, `--icon-secondary`, opacity 50, `cursor-not-allowed`.
+    - Ready Send: `--surface-primary-active` (#2b2b2b), white arrow, hover opacity 90.
+    - "Choose project": h32, px8, 14/500 `--text-secondary`, lucide `folder` + label.
 - **Textarea:** 14/24, transparent background, auto-grow up to 200px then scroll, placeholder colour `--text-tertiary`.
   - Empty state: "Assign a task or ask anything..."
   - In a thread: "Send a message..."
@@ -393,7 +398,7 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 - **Task row menu:**
   - **[Observed 2026-10-18]** 180px wide, radius 10, padding 5, white, shadow `0 4px 12px rgba(0,0,0,.14)`. Items h32, radius 8, padding `0 9px`, gap 8, 14px `#5e5e5e` (the focused item is `--text-primary`); icons 16px at stroke 1.5.
   - Items: **Pin to top** (tabler `pin`) — or **Unpin** (tabler `pinned-off`) when pinned — **Rename** (tabler `pencil`), **Duplicate** (tabler `copy`), **Add to project** (lucide `folder-input`, ›), **Delete** (tabler `trash`, `#dc2626`).
-- **Tooltip:** `#1b1b1b` background, white 10.5px text, radius 6, padding 4×8. Keycaps are 18px with radius 5 at `rgba(255,255,255,.15)` **[TBV]**.
+- **Tooltip [Observed 2026-10-18]:** `#1b1b1b` background, 1px `--magica-tooltip-border`, `#f7f7f7` text at 10.5px/600 (line-height 15.75), radius 6, no arrow, 4px from the trigger. The reference pads `4 4 4 8`; ours pads 4×8 on both sides (user call: the 4px right edge looked cramped). Composer tooltips show the button's own name ("Attach files", "Connect apps", "Dictation"), and the empty Send shows "Add a message first". Keycaps are 18px with radius 5 at `rgba(255,255,255,.15)` **[TBV]**.
 
 ### 4.10 Search dialog (⌘/Ctrl+K) [Observed 2026-10-18]
 - **Dialog:** 512 × 370, white, radius 24, Tailwind `shadow-lg` (`0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1)`). Accessible name "Search tasks", description "Search your recent tasks and open an existing task or start a new one."

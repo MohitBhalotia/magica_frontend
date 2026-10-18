@@ -9,9 +9,20 @@ import {
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import type { ChatList, UpdateChatRequest } from "@mohitbhalotia/magica-contracts";
+import type {
+  ChatList,
+  ChatSummary,
+  CreateChatRequest,
+  UpdateChatRequest,
+} from "@mohitbhalotia/magica-contracts";
 
-import { deleteChat, duplicateChat, listChats, updateChat } from "@/services/chats.service";
+import {
+  createChat,
+  deleteChat,
+  duplicateChat,
+  listChats,
+  updateChat,
+} from "@/services/chats.service";
 import { ApiError } from "@/services/http";
 
 type Pages = InfiniteData<ChatList, string | undefined>;
@@ -34,6 +45,49 @@ export function useChatList() {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
     enabled: isSignedIn === true,
+  });
+}
+
+/**
+ * Send from the empty state: creates the chat and its first message. A "New chat" row appears
+ * at the top at once (the server uses clientMessageId as the chat id, so the row is the real one)
+ * and is removed again if the server says no. Callers navigate in `onSuccess`.
+ */
+export function useCreateChat() {
+  const queryClient = useQueryClient();
+  const { userId, getToken } = useAuth();
+  const queryKey = chatListKey(userId);
+  return useMutation({
+    mutationFn: async (body: CreateChatRequest) => createChat(body, await getToken()),
+    onMutate: async ({ clientMessageId }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<Pages>(queryKey);
+      const now = new Date().toISOString();
+      const row: ChatSummary = {
+        id: clientMessageId,
+        title: "New chat",
+        titleSource: "placeholder",
+        isPinned: false,
+        createdAt: now,
+        updatedAt: now,
+      };
+      queryClient.setQueryData<Pages>(queryKey, (old) =>
+        old
+          ? {
+              ...old,
+              pages: old.pages.map((page, i) =>
+                i === 0 ? { ...page, items: [row, ...page.items] } : page,
+              ),
+            }
+          : old,
+      );
+      return { previous };
+    },
+    onError: (error, _body, context) => {
+      queryClient.setQueryData(queryKey, context?.previous);
+      showError(error);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
 }
 

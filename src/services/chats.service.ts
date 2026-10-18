@@ -3,6 +3,8 @@ import { z } from "zod";
 import {
   ChatListSchema,
   ChatSummarySchema,
+  CreateChatResponseSchema,
+  type CreateChatRequest,
   type UpdateChatRequest,
 } from "@mohitbhalotia/magica-contracts";
 
@@ -13,6 +15,14 @@ const chatPath = (id: string) => `/api/v1/chats/${encodeURIComponent(id)}`;
 
 export const listChats = (cursor: string | undefined, token: Token) =>
   request(`/api/v1/chats${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`, ChatListSchema, {
+    token,
+  });
+
+/** Idempotent: resending the same clientMessageId returns the same chat. */
+export const createChat = (body: CreateChatRequest, token: Token) =>
+  request("/api/v1/chats", CreateChatResponseSchema, {
+    method: "POST",
+    body: JSON.stringify(body),
     token,
   });
 

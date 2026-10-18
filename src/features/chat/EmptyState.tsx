@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 
 import { Mascot } from "@/components/Mascot";
+import { Composer } from "@/features/chat/Composer";
 import { IdeaGallery } from "@/features/ideas/IdeaGallery";
 
 // Ticks every 15s so the minute rolls over on time without a per-second render.
@@ -51,7 +52,7 @@ export function EmptyState() {
         </p>
       </div>
       <div className="flex w-full max-w-[900px] flex-col gap-space-08">
-        {/* The composer goes here (F6). */}
+        <Composer />
         <IdeaGallery />
       </div>
     </div>

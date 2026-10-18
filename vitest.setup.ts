@@ -12,19 +12,23 @@ vi.mock("next/navigation", async () => {
   const { router } = await import("@/test/router");
   return { useRouter: () => router, usePathname: () => "/chat", useParams: () => ({}) };
 });
-vi.mock("@clerk/nextjs", () => ({
-  // Signed out by default; list tests override with vi.mocked(useAuth).mockReturnValue(...).
-  useAuth: vi.fn(() => ({
-    isSignedIn: false,
-    userId: null,
-    getToken: () => Promise.resolve(null),
-  })),
-  Show: ({ when, children }: { when: string; children: ReactNode }) =>
-    when === "signed-out" ? children : null,
-  SignInButton: ({ children }: { children?: ReactNode }) => children,
-  SignUpButton: ({ children }: { children?: ReactNode }) => children,
-  UserButton: () => null,
-}));
+vi.mock("@clerk/nextjs", async () => {
+  const { clerk } = await import("@/test/clerk");
+  return {
+    // Signed out by default; list tests override with vi.mocked(useAuth).mockReturnValue(...).
+    useAuth: vi.fn(() => ({
+      isSignedIn: false,
+      userId: null,
+      getToken: () => Promise.resolve(null),
+    })),
+    useClerk: () => clerk,
+    Show: ({ when, children }: { when: string; children: ReactNode }) =>
+      when === "signed-out" ? children : null,
+    SignInButton: ({ children }: { children?: ReactNode }) => children,
+    SignUpButton: ({ children }: { children?: ReactNode }) => children,
+    UserButton: () => null,
+  };
+});
 
 // jsdom has no matchMedia; sonner and next-themes read it.
 window.matchMedia = (query) => ({
