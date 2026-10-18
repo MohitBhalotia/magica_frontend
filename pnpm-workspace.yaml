@@ -1,0 +1,7 @@
+allowBuilds:
+  sharp: false
+  unrs-resolver: false
+
+# Our own contracts are consumed right after publishing; the release-age guard is for third parties.
+minimumReleaseAgeExclude:
+  - "@mohitbhalotia/*"

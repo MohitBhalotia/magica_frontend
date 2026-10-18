@@ -1,0 +1,202 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/* next-themes toggles the `.dark` class on <html> (DESIGN.md §7). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Token → utility mapping, generated from tokens.css names (DESIGN.md §2, §8). Values stay in
+   tokens.css; `inline` makes utilities reference the reference variables directly. */
+@theme inline {
+  /* Figtree substitutes the proprietary magicaCircular (DEC-028); swap via --font-body. */
+  --font-sans: var(--font-body), Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Colours: bg-surface-primary, text-text-secondary, text-icon-primary, border-boarder-tertiary */
+  --color-surface-main-background: var(--surface-main-background);
+  --color-surface-main-background-2: var(--surface-main-background-2);
+  --color-surface-main-background-3: var(--surface-main-background-3);
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tertiary: var(--surface-tertiary);
+  --color-surface-disabled: var(--surface-disabled);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-disabled: var(--text-disabled);
+  --color-icon-primary: var(--icon-primary);
+  --color-icon-secondary: var(--icon-secondary);
+  --color-icon-tertiary: var(--icon-tertiary);
+  --color-icon-disabled: var(--icon-disabled);
+  --color-boarder-primary: var(--boarder-primary);
+  --color-boarder-secondary: var(--boarder-secondary);
+  --color-boarder-tertiary: var(--boarder-tertiary);
+  --color-boarder-disabled-for-card: var(--boarder-disabled-for-card);
+  --color-surface-overlay-control: var(--surface-overlay-control);
+  --color-surface-overlay-control-hover: var(--surface-overlay-control-hover);
+  --color-surface-on-action: var(--surface-on-action);
+  --color-surface-primary-active: var(--surface-primary-active);
+  --color-surface-primary-hover: var(--surface-primary-hover);
+  --color-surface-primary-disabled: var(--surface-primary-disabled);
+  --color-surface-action-disabled: var(--surface-action-disabled);
+  --color-surface-success-active: var(--surface-success-active);
+  --color-surface-success-hover: var(--surface-success-hover);
+  --color-surface-success-disabled: var(--surface-success-disabled);
+  --color-surface-information-active: var(--surface-information-active);
+  --color-surface-information-hover: var(--surface-information-hover);
+  --color-surface-information-disabled: var(--surface-information-disabled);
+  --color-surface-warning-active: var(--surface-warning-active);
+  --color-surface-warning-hover: var(--surface-warning-hover);
+  --color-surface-warning-disabled: var(--surface-warning-disabled);
+  --color-surface-warning-disabled-2: var(--surface-warning-disabled-2);
+  --color-surface-error-active: var(--surface-error-active);
+  --color-surface-error-hover: var(--surface-error-hover);
+  --color-surface-error-disabled: var(--surface-error-disabled);
+  --color-text-action: var(--text-action);
+  --color-text-on-action: var(--text-on-action);
+  --color-text-on-inverse: var(--text-on-inverse);
+  --color-text-action-disabled: var(--text-action-disabled);
+  --color-text-success: var(--text-success);
+  --color-text-success-disabled: var(--text-success-disabled);
+  --color-text-information: var(--text-information);
+  --color-text-information-disabled: var(--text-information-disabled);
+  --color-text-warning: var(--text-warning);
+  --color-text-warning-disabled: var(--text-warning-disabled);
+  --color-text-error: var(--text-error);
+  --color-text-error-disabled: var(--text-error-disabled);
+  --color-icon-action: var(--icon-action);
+  --color-icon-on-action: var(--icon-on-action);
+  --color-icon-action-disabled: var(--icon-action-disabled);
+  --color-icon-success: var(--icon-success);
+  --color-icon-success-disabled: var(--icon-success-disabled);
+  --color-icon-information: var(--icon-information);
+  --color-icon-information-disabled: var(--icon-information-disabled);
+  --color-icon-warning: var(--icon-warning);
+  --color-icon-warning-disabled: var(--icon-warning-disabled);
+  --color-icon-error: var(--icon-error);
+  --color-icon-error-disabled: var(--icon-error-disabled);
+  --color-boarder-action: var(--boarder-action);
+  --color-boarder-success: var(--boarder-success);
+  --color-boarder-information: var(--boarder-information);
+  --color-boarder-warning: var(--boarder-warning);
+  --color-boarder-error: var(--boarder-error);
+  --color-icon-upgrade-spark: var(--icon-upgrade-spark);
+  --color-user-message: var(--user-message-background);
+  /* shadcn primitives (the reference stores these as HSL triplets) */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-foreground-rgb: hsl(var(--foreground-rgb));
+  --color-background-start-rgb: hsl(var(--background-start-rgb));
+  --color-background-end-rgb: hsl(var(--background-end-rgb));
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+  /* Radius: rounded-radius-l, rounded-radius-xxl, rounded-radius-max */
+  --radius-radius-none: var(--radius-none);
+  --radius-radius-xs: var(--radius-xs);
+  --radius-radius-s: var(--radius-s);
+  --radius-radius-m: var(--radius-m);
+  --radius-radius-l: var(--radius-l);
+  --radius-radius-xl: var(--radius-xl);
+  --radius-radius-xxl: var(--radius-xxl);
+  --radius-radius-xxxl: var(--radius-xxxl);
+  --radius-radius-xxxxl: var(--radius-xxxxl);
+  --radius-radius-xxxxxl: var(--radius-xxxxxl);
+  --radius-radius-xxxxxxl: var(--radius-xxxxxxl);
+  --radius-radius-tooltip: var(--radius-tooltip);
+  --radius-radius-tooltipKeycap: var(--radius-tooltipKeycap);
+  --radius-radius-menuItem: var(--radius-menuItem);
+  --radius-radius-settingsField: var(--radius-settingsField);
+  --radius-radius-pageSection: var(--radius-pageSection);
+  --radius-radius-max: var(--radius-max);
+  /* Type scale: text-body, text-small, text-caption, text-heading-lg (size + line-height) */
+  --text-display: var(--font-size-display);
+  --text-display--line-height: var(--line-height-display);
+  --text-page-title: var(--font-size-page-title);
+  --text-page-title--line-height: var(--line-height-page-title);
+  --text-page-subtitle: var(--font-size-page-subtitle);
+  --text-page-subtitle--line-height: var(--line-height-page-subtitle);
+  --text-lead: var(--font-size-lead);
+  --text-lead--line-height: var(--line-height-lead);
+  --text-heading-lg: var(--font-size-heading-lg);
+  --text-heading-lg--line-height: var(--line-height-heading-lg);
+  --text-heading-md: var(--font-size-heading-md);
+  --text-heading-md--line-height: var(--line-height-heading-md);
+  --text-heading-sm: var(--font-size-heading-sm);
+  --text-heading-sm--line-height: var(--line-height-heading-sm);
+  --text-heading-xs: var(--font-size-heading-xs);
+  --text-heading-xs--line-height: var(--line-height-heading-xs);
+  --text-body: var(--font-size-body);
+  --text-body--line-height: var(--line-height-body);
+  --text-copy: var(--font-size-copy);
+  --text-copy--line-height: var(--line-height-copy);
+  --text-small: var(--font-size-small);
+  --text-small--line-height: var(--line-height-small);
+  --text-metadata: var(--font-size-metadata);
+  --text-metadata--line-height: var(--line-height-metadata);
+  --text-tooltip: var(--font-size-tooltip);
+  --text-tooltip--line-height: var(--line-height-tooltip);
+  --text-tooltip-keycap: var(--font-size-tooltip-keycap);
+  --text-tooltip-keycap--line-height: var(--line-height-tooltip-keycap);
+  --text-search-label: var(--font-size-search-label);
+  --text-search-label--line-height: var(--line-height-search-label);
+  --text-button: var(--font-size-button);
+  --text-button--line-height: var(--line-height-button);
+  --text-caption: var(--font-size-caption);
+  --text-caption--line-height: var(--line-height-caption);
+  --text-caption-1: var(--font-size-caption-1);
+  --text-caption-1--line-height: var(--line-height-caption-1);
+  --text-caption-2: var(--font-size-caption-2);
+  --text-caption-2--line-height: var(--line-height-caption-2);
+  /* Spacing: p-space-04, gap-space-03 (DESIGN.md §2.4: use only these) */
+  --spacing-space-00: var(--space-00);
+  --spacing-space-01: var(--space-01);
+  --spacing-space-02: var(--space-02);
+  --spacing-space-03: var(--space-03);
+  --spacing-space-04: var(--space-04);
+  --spacing-space-05: var(--space-05);
+  --spacing-space-06: var(--space-06);
+  --spacing-space-07: var(--space-07);
+  --spacing-space-08: var(--space-08);
+  --spacing-space-09: var(--space-09);
+  --spacing-space-10: var(--space-10);
+  --spacing-space-11: var(--space-11);
+  --spacing-space-12: var(--space-12);
+  --spacing-space-13: var(--space-13);
+  --spacing-space-14: var(--space-14);
+  --spacing-space-15: var(--space-15);
+  --spacing-space-16: var(--space-16);
+  /* shadow-xs..xl come from the reference :root directly (same names as Tailwind's) */
+  --shadow-popover: var(--shadow-xl);
+}
+
+@layer base {
+  body {
+    @apply bg-surface-main-background font-sans text-body text-text-primary;
+  }
+}

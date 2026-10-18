@@ -34,7 +34,7 @@ src/styles/tokens.css  reference CSS variables (copied verbatim, see PRD §4.1)
 
 ## Rules (repo-specific)
 - **Never redefine backend shapes.**
-  - Import schemas and types from `@agent-chat/contracts`.
+  - Import schemas and types from `@mohitbhalotia/magica-contracts`.
   - Parse every API response and every realtime metadata payload with the contract schema.
   - If a shape is missing, add it to contracts in the backend first.
 - **Data access:**
@@ -84,4 +84,4 @@ src/styles/tokens.css  reference CSS variables (copied verbatim, see PRD §4.1)
 ## Git
 - Feature branches, Conventional Commits (`feat(composer): …`, `fix(realtime): …`, `test(thread): …`).
 - Commit only after the checks pass. Push and open PRs only when the user asks.
-- Bump `@agent-chat/contracts` in a dedicated commit or PR.
+- Bump `@mohitbhalotia/magica-contracts` in a dedicated commit or PR.

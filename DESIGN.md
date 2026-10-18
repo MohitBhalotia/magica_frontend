@@ -27,9 +27,9 @@ The design system and UI behaviour spec for `magica_frontend`. Its goal is **pix
 
 **Implementation [Decision]:**
 - Copy the reference variable names verbatim into `src/styles/tokens.css`, with `:root` for light and `.dark` for dark.
-- Map them in `tailwind.config.ts` (e.g. `bg-surface-primary`, `text-text-secondary`, `rounded-radius-l`).
+- Map them with Tailwind v4 `@theme inline` in `src/app/globals.css` (DEC-037): colours `bg-surface-primary`, `text-text-secondary`, `text-icon-primary`, `border-boarder-tertiary`; radius `rounded-radius-l`; type `text-body`, `text-caption` (size + line-height); spacing `p-space-04`; `shadow-xs…xl` and `shadow-popover`.
 - Keep the reference's misspelling `--boarder-*` so values can be diffed one to one against the reference.
-- shadcn's HSL variables (`--background`, `--primary`, …) are also defined, so shadcn primitives inherit the theme.
+- shadcn's HSL variables (`--background`, `--primary`, …) come verbatim from the reference dump and are mapped as `hsl(var(--x))`, so shadcn primitives inherit the theme.
 
 ### 2.1 Colour — semantic (light / dark) [Observed]
 | Token | Light | Dark |
