@@ -29,8 +29,13 @@ const Toaster = ({ ...props }: ToasterProps) => {
       closeButton
       toastOptions={{
         classNames: {
+          // Room for the ✕, which the reference shows inside the card on the right.
+          toast: "pr-space-09!",
           title: "text-small! font-semibold!",
           description: "text-small! text-text-secondary!",
+          // Sonner pins it to the top-left corner as a bordered circle; move it right, centred.
+          closeButton:
+            "top-1/2! right-space-04! left-auto! transform-none! -translate-y-1/2! border-0! bg-transparent! text-icon-secondary! hover:text-icon-primary!",
         },
       }}
       style={
