@@ -300,6 +300,15 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
   - Clicking a card **fills the composer** and doesn't send.
   - "See more ideas" button at the end.
 - **Data [Decision]:** a static JSON of ~12 ideas with our own thumbnails, all achievable with our 3 tools. The reference's video-template ideas need tools we don't have, so we mirror the layout, not the content.
+- **[Observed 2026-10-18] Exact values:**
+  - **Hero:** a 448-wide stack, padding-top 113 (40 on mobile), 40px mascot.
+  - **Time:** 13px/500, `--text-secondary`, tracking .01em, margin-top 19 (14 on mobile). "PM" is caption-1, shifted by (−3px, −5px). Formatted en-US 12-hour on every locale.
+  - **Heading and tagline:** h1 24/32 bold (20 on mobile), margin-top 4; tagline 14/24, 500 weight, margin-top 8.
+  - **Spacing:** 48 between the hero and the composer, 32 between the composer and the tabs, 32 between the tabs and the cards.
+  - **Tabs:** h34, px10, radius 10, 14/500, spread `justify-between` across 900, scrolling sideways on narrow screens. The active tab is `--surface-secondary` with foreground text.
+  - **Cards:** radius 16, 1px `--boarder-secondary`, `--surface-main-background-2`, `shadow-xs`. Media on top, then a title footer (px8, pt4, pb8, 14/500, one line). Three columns with a 16px gap (two columns, 12px gap, on mobile).
+  - **"See more ideas":** h36, px12, radius 10, 1px border, `--surface-main-background-3`, `shadow-xs`, margin-top 32.
+- **Ours:** gradient placeholder thumbnails, 9 ideas shown, then "See more ideas" shows the rest. Clicking a card sets the new-chat draft in `composerStore`.
 
 ### 4.5 Messages [Observed]
 - **User message:**
