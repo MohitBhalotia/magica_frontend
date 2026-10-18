@@ -37,7 +37,8 @@ it("the theme tabs switch the theme", async () => {
   expect(document.documentElement).toHaveClass("dark");
 });
 
-it("signed out, the footer offers Sign in", () => {
+it("signed out, the footer shows the Magica 101 card and Sign in", () => {
   renderFooter();
+  expect(screen.getByRole("button", { name: /Learn what Magica can do/ })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
 });

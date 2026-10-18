@@ -26,7 +26,8 @@ function PopoverContent({
         align={align}
         sideOffset={sideOffset}
         className={cn(
-          "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 z-50 w-72 origin-(--radix-popover-content-transform-origin) rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-hidden",
+          // Reference popover (DESIGN §4.3): white, radius 16, 1px border, padding 16, shadow-md.
+          "z-50 w-72 origin-(--radix-popover-content-transform-origin) rounded-radius-xxl border border-boarder-tertiary bg-surface-main-background p-space-05 text-text-primary shadow-md outline-hidden",
           className,
         )}
         {...props}

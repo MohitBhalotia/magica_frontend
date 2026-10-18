@@ -22,6 +22,7 @@ vi.mock("@clerk/nextjs", () => ({
   Show: ({ when, children }: { when: string; children: ReactNode }) =>
     when === "signed-out" ? children : null,
   SignInButton: ({ children }: { children?: ReactNode }) => children,
+  SignUpButton: ({ children }: { children?: ReactNode }) => children,
   UserButton: () => null,
 }));
 

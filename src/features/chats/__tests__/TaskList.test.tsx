@@ -76,6 +76,16 @@ it("shows the empty state", async () => {
   expect(await screen.findByText("No tasks yet")).toBeInTheDocument();
 });
 
+it("signed out, shows the empty state without fetching", () => {
+  vi.mocked(useAuth).mockReturnValue({
+    isSignedIn: false,
+    userId: null,
+    getToken: () => Promise.resolve(null),
+  } as unknown as ReturnType<typeof useAuth>);
+  renderWithProviders(<TaskList />);
+  expect(screen.getByText("No tasks yet")).toBeInTheDocument();
+});
+
 it("pin moves the row into Pinned tasks", async () => {
   renderWithProviders(<TaskList />);
   await screen.findByRole("link", { name: "Greeting" });

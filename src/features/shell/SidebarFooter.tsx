@@ -5,7 +5,6 @@ import {
   ArrowRight,
   EllipsisVertical,
   Laptop,
-  LogIn,
   Moon,
   Settings,
   Sparkles,
@@ -17,6 +16,7 @@ import { useTheme } from "next-themes";
 import { Tabs as TabsPrimitive } from "radix-ui";
 import { useState } from "react";
 
+import { Mascot } from "@/components/Mascot";
 import { notAvailable, ROW } from "@/features/shell/nav";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +35,20 @@ export function SidebarFooter() {
 
   return (
     <div className="shrink-0 border-t border-boarder-tertiary px-space-03 pb-space-03">
+      <Show when="signed-out">
+        {/* Magica 101 is outside the brief (PRD §6.10): the card renders, inert. */}
+        <button
+          type="button"
+          onClick={notAvailable}
+          className="mt-space-03 mb-space-01 flex w-full items-start gap-space-03 rounded-radius-xxl bg-surface-main-background px-(--magica-sidebar-card-padding-x) py-space-03 text-left text-metadata text-text-secondary shadow-[0_0_1px_rgba(34,34,34,.08),inset_0_0_2px_rgba(34,34,34,.02)] transition-colors hover:text-text-primary"
+        >
+          <Mascot className="mt-space-01 size-4 shrink-0" />
+          <span className="flex flex-col">
+            <span className="text-small text-text-primary">Magica 101</span>
+            Learn what Magica can do
+          </span>
+        </button>
+      </Show>
       <div className="py-space-02">
         <button
           type="button"
@@ -114,12 +128,16 @@ export function SidebarFooter() {
         />
       </Show>
       <Show when="signed-out">
-        <SignInButton mode="modal">
-          <button type="button" className={ROW}>
-            <LogIn />
-            Sign in
-          </button>
-        </SignInButton>
+        <div className="flex justify-center px-space-04 py-space-02">
+          <SignInButton mode="modal">
+            <button
+              type="button"
+              className="h-(--magica-control-height) w-full rounded-radius-l bg-surface-secondary px-space-05 text-small font-medium text-text-primary transition-colors outline-none hover:bg-surface-tertiary focus-visible:ring-2 focus-visible:ring-boarder-action"
+            >
+              Sign in
+            </button>
+          </SignInButton>
+        </div>
       </Show>
     </div>
   );

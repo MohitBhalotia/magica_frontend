@@ -231,7 +231,9 @@ The reference mixes **Lucide** (most icons) and **Tabler** (a few). Default size
   - Credits pill: 32px, radius max, sparkle icon and `29.95M` (14px/500).
   - **[Observed 2026-10-18]** The reference now shows a dark **"Computer"** pill (lucide `monitor`, aria "Open computer"; icon-only on mobile) in place of the files button. It is a reference feature outside our brief's tool surface → render it inert ("Not available in this build"), or keep our files button; logged in PRD §14.
   - The model button reads "Magica Auto" in the reference; ours reads "OpenRouter Free" (§4.3).
-- **Signed out:** a centre "Magica 101" pill, plus "Sign in" (ghost) and "Sign up" (black pill, h32, px12, `shadow-sm`).
+- **Signed out [Observed 2026-10-18]:**
+  - **Top bar:** a "Magica 101" pill absolutely centred in the header (`bg-surface-secondary`, h28, px12, 14px/500, hidden below `sm`), plus "Sign in" (ghost pill, h32) and "Sign up" (`bg-text-primary` / `text-surface-main-background`, h32, px12, `shadow-sm`, hover opacity 90).
+  - **Sidebar:** shows "No tasks yet" (py32). The footer has a "Magica 101 / Learn what Magica can do" card (white, radius 16, 16px mascot) above More, then a centred filled "Sign in" (h34, `--surface-secondary`, radius 10).
 
 ---
 
@@ -276,14 +278,14 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 
 - **Attachment chips [TBV]:** above the textarea. Thumbnail 48–56px, radius 8, progress ring or bar, ✕ to remove, retry on error. Order is stable.
 - **Plan-mode toggle [TBV]:** placement unknown. Ask the reviewers before building it.
-- **OpenRouter Free status [Decision]:** the model selector shows "OpenRouter Free" with a 6px status dot (green, amber or red) in the menu item's subtitle line, e.g. "Free models · Available". This keeps the reference's top-bar layout instead of adding new composer chrome.
+- **OpenRouter Free status [Decision]:** the model selector shows "OpenRouter Free". Once `/models/status` exists (M2), a 6px status dot (green, amber or red) goes in the menu item's subtitle line. This keeps the reference's top-bar layout instead of adding new composer chrome.
 
 ### 4.3 Model selector menu [Observed]
-- **Popover:** white, radius 16, `shadow-popover`, padding 8, width ~360.
-- **Item:**
-  - 20px black rounded-square logo, title (14px/500) and subtitle (13px `--text-secondary`).
-  - Padding 12; hover and selected background `--surface-primary`, radius 8.
-- **[Decision]** A single item: "OpenRouter Free" / "Free models router — picks an available free model". The reference lists Magica Auto, Fast, Flash, Max and Pro Max.
+- **[Observed 2026-10-18]**
+  - **Trigger:** h28, padding 4×8, gap 8, radius 10. A 12px `magica_favicon_black.svg` (with `dark:invert`), the name (14px/400), and a 14px chevron that flips while the popover is open. Hover and open background: `--magica-foundation-surface-hover`.
+  - **Popover:** a role="dialog" popover; 360 wide, radius 16, 1px `--boarder-tertiary`, padding 16, `shadow-md`.
+  - **Item:** h54, padding `8 24 8 12`, gap 10, radius 10, with a 20px logo, title 14px/400, and subtitle 12px `--text-secondary`, all on one line (`whitespace-nowrap`). The selected item has a `--surface-primary` background.
+- **[Decision]** A single item: "OpenRouter Free" / "Picks an available free model for your task". The reference lists Magica Auto, Fast, Flash, Max and Pro Max.
 
 ### 4.4 Empty state [Observed]
 - **Centred stack:**

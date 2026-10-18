@@ -46,8 +46,13 @@ export function TaskList({ onNavigate }: { onNavigate?: () => void }) {
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Signed out, the reference shows no task list.
-  if (!isSignedIn) return null;
+  // Signed out, the reference shows the same empty state.
+  const empty = (
+    <p className="px-space-04 py-space-09 text-center text-small text-text-secondary">
+      No tasks yet
+    </p>
+  );
+  if (!isSignedIn) return empty;
   if (isPending) {
     return (
       <div
@@ -64,7 +69,7 @@ export function TaskList({ onNavigate }: { onNavigate?: () => void }) {
 
   const chats = data?.pages.flatMap((p) => p.items) ?? [];
   if (chats.length === 0) {
-    return <p className="mt-space-07 text-center text-small text-text-secondary">No tasks yet</p>;
+    return empty;
   }
 
   const row = (chat: ChatSummary) => (
