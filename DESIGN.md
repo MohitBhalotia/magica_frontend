@@ -1,4 +1,4 @@
-# DESIGN.md — Agent Chat UI
+# DESIGN.md — Magica UI
 
 The design system and UI behaviour spec for `magica_frontend`. Its goal is **pixel parity with the reference product**
 (https://app.magica.com/chat, which `app.galaxy.ai/chat` redirects to). The brief says: *"When unsure, match the reference exactly rather than re-designing."*
@@ -195,26 +195,45 @@ The reference mixes **Lucide** (most icons) and **Tabler** (a few). Default size
 - **Composer gutter:**
   - Width is `calc(100% − gutter)`, where the gutter is 1rem below `sm`, 2rem from `sm`, 3rem from `md`, and auto-centred at max 900 from `lg`.
   - The wrapper uses `pt-2 pb-1 lg:px-8`.
-- **Breakpoints [Decision]:** Tailwind defaults (`sm` 640, `md` 768, `lg` 1024). The sidebar becomes an off-canvas drawer below `lg` **[TBV] exact breakpoint and the drawer trigger**.
+- **Breakpoints:** Tailwind defaults (`sm` 640, `md` 768, `lg` 1024). **[Observed 2026-10-18]** The sidebar is inline from **`md` (768px)** up and becomes an off-canvas drawer below it.
+  - **Drawer trigger:** an "Open sidebar" icon button (tabler `layout-sidebar`) at the far left of the top bar, before the model selector.
+  - **Drawer:** the same sidebar card (`--surface-main-background-2`, radius 24), full-width on phones, over a fixed backdrop `--surface-overlay-control` (`rgba(10,10,11,.5)`) with `backdrop-blur-[3px]`, z-40. Esc closes it.
+  - On touch widths the task-row "…" buttons are always visible (no hover).
 
 ### 3.2 Sidebar [Observed]
 - **Header (52):** logo (80×20), plus Search and Collapse icon buttons on the right (28px controls).
-- **"New task" row:** 34px, radius 10, 14px weight 500 `--text-secondary`, padding `0 8px`, with a `Ctrl+Shift+O` keycap on the right that shows on hover **[TBV]**.
+- **"New task" row:** 34px, radius 10, 14px weight 500 `--text-secondary`, padding `0 8px`, with a `Ctrl+Shift+O` keycap on the right that **shows on hover only** (`opacity-0 group-hover:opacity-100`, 150ms `cubic-bezier(0.4,0,0.2,1)`; keycap text `--text-primary`) **[Observed 2026-10-18]**. Row hover background `--surface-secondary`.
 - **Nav rows:** same row spec, 16px icon with a 10px gap. Hover background `--surface-secondary`; hovered text becomes `--text-primary`.
 - **"Recent tasks":**
   - Caption-size header (12px, `--text-tertiary`) with a chevron that appears on hover, and "View all" on the right.
   - Task rows: 34px, truncated, `pl-8 pr-8`; the right padding grows to 40 on hover to make room for the "…" button (24px, radius 4).
   - Active row: background `--surface-tertiary`, rounded, with `aria-current="page"`.
+- **Pinned [Observed 2026-10-18]:** pinned chats move into their own **"Pinned tasks"** section above "Recent tasks" (same caption header style; the section disappears when nothing is pinned). Rows look identical to recent rows — no pin icon. Pinning or unpinning does not reorder chats by activity.
 - **Empty list:** centred "No tasks yet" (14px, `--text-secondary`).
 - **Loading:** grey skeleton bars, about 10 rows of varying widths.
 - **Footer:** a divider, then "⋮ More", then the user button (avatar circle + name). Signed out, there is a "Magica 101" card, "Claim Offer" and "Sign in".
+  - **[Observed 2026-10-18]** Only "More" and the user button are visible. Available Credits (link to `/usage`), Add Credits, Settings, Updates, "Invite team members" and the System / Light / Dark theme tabs live inside the **More** menu.
+  - **[Observed 2026-10-18] "More" expands inline** (not a dropdown); the row reads **"Less"** while open (lucide `ellipsis-vertical`, 14px weight 400). Panel, top to bottom:
+    - "Available Credits" (12px) with the value right-aligned (12px/500 `--text-secondary`, tabular).
+    - "Add Credits": h32, radius 10, dark gradient, 12px/500, lucide `wallet`, shadow `0 0 0 1px #303030, inset 0 1px 0 rgba(255,255,255,.15), 0 1px 3px rgba(0,0,0,.2)`.
+    - "Settings" (lucide `settings`) and "Updates" (lucide `sparkles`): two outlined h28 buttons, gap 8.
+    - "Invite team members": outlined 34px row, lucide `users` and `arrow-right`.
+    - Theme tabs: h32 pill, 1px border, padding 2; tabs are h24 with 14px lucide `laptop` / `sun` / `moon` (aria "System theme" / "Light theme" / "Dark theme"); a sliding `--magica-foundation-surface-hover` indicator moves over 200ms.
+  - User button: Clerk trigger, full width, 34px; avatar on the left, name right-aligned (13px/500).
+- **Logo [Observed 2026-10-18]:** `/magica.png` at 80×20 (`object-contain object-left`, `dark:invert`). The rail mark is `/magica_logo_collapsed_{light,dark}.svg` at 18×13, which fades to tabler `layout-sidebar` on hover. Both are copied to `public/`.
+- **Header controls [Observed 2026-10-18]:** the logo button is "Start a new task"; the icon buttons are "Search" and "Close sidebar" (28px, round, 2px gap).
+- **Collapsed rail [Observed 2026-10-18]:** 48px wide. "Open sidebar" (logo mark, 34px), then Search (28px, 16px below), then New task and the 7 nav items as 34px icon buttons with 4px gaps; "Settings" (32px) sits at the bottom. No task list and no footer.
 
 ### 3.3 Top bar [Observed]
 - **Left:** model selector button (28px), with a small black rounded-square logo, the model name (14px/500) and a chevron-down. It is **disabled and dimmed** while a run is active.
 - **Right:**
   - Files button: 36px circle, `--surface-primary`, tabler folder-open.
   - Credits pill: 32px, radius max, sparkle icon and `29.95M` (14px/500).
-- **Signed out:** a centre "Magica 101" pill, plus "Sign in" (ghost) and "Sign up" (black pill, h32, px12, `shadow-sm`).
+  - **[Observed 2026-10-18]** The reference now shows a dark **"Computer"** pill (lucide `monitor`, aria "Open computer"; icon-only on mobile) in place of the files button. It is a reference feature outside our brief's tool surface → render it inert ("Not available in this build"), or keep our files button; logged in PRD §14.
+  - The model button reads "Magica Auto" in the reference; ours reads "OpenRouter Free" (§4.3).
+- **Signed out [Observed 2026-10-18]:**
+  - **Top bar:** a "Magica 101" pill absolutely centred in the header (`bg-surface-secondary`, h28, px12, 14px/500, hidden below `sm`), plus "Sign in" (ghost pill, h32) and "Sign up" (`bg-text-primary` / `text-surface-main-background`, h32, px12, `shadow-sm`, hover opacity 90).
+  - **Sidebar:** shows "No tasks yet" (py32). The footer has a "Magica 101 / Learn what Magica can do" card (white, radius 16, 16px mascot) above More, then a centred filled "Sign in" (h34, `--surface-secondary`, radius 10).
 
 ---
 
@@ -238,13 +257,19 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 - **Container:**
   - Radius 24, padding `16 16 12`, min height 132.
   - Background: a gradient `from-surface-primary to-surface-main-background` (top to bottom). Dark mode uses a flat `--surface-main-background-3`.
-  - No shadow and no border **[TBV] focus state**.
+  - No shadow and no border. **Focus: no visual change** — the container keeps the same border, shadow and background; only the caret (`--text-primary`) appears **[Observed 2026-10-18]**.
+  - **Edge [Observed 2026-10-18]:** an absolutely-positioned overlay draws an inset 1px ring, `--boarder-secondary` (#dedede), darkening to `--boarder-primary` (#bdbdbd) when the composer is hovered (150ms).
+  - **Buttons [Observed 2026-10-18]:** all action buttons, Send included, are 32px circles.
+    - Empty Send: `--surface-main-background-2`, `--icon-secondary`, opacity 50, `cursor-not-allowed`.
+    - Ready Send: `--surface-primary-active` (#2b2b2b), white arrow, hover opacity 90.
+    - "Choose project": h32, px8, 14/500 `--text-secondary`, lucide `folder` + label.
 - **Textarea:** 14/24, transparent background, auto-grow up to 200px then scroll, placeholder colour `--text-tertiary`.
   - Empty state: "Assign a task or ask anything..."
   - In a thread: "Send a message..."
 - **Action row:**
-  - Left: Attach (paperclip) and Connect apps (plug rotated −45°), 32px ghost icon buttons.
-  - Right: Dictation (mic) and the Send / Stop button (28px circle).
+  - Left: Attach (lucide `paperclip`) and Connect apps (tabler `plug` rotated −45°), 32px ghost icon buttons.
+  - Right: Dictation (lucide `mic`) and the Send / Stop button (28px circle).
+  - **[Observed 2026-10-18]** The reference added **"Choose project"** (lucide `folder`) between Attach and Connect apps; it shows the icon plus the label "Choose project" (desktop and mobile). Projects are out of scope → inert with the "Coming soon" tooltip, like Connect apps.
 - **Send states:**
 
 | State | Look | Behaviour |
@@ -258,14 +283,14 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 
 - **Attachment chips [TBV]:** above the textarea. Thumbnail 48–56px, radius 8, progress ring or bar, ✕ to remove, retry on error. Order is stable.
 - **Plan-mode toggle [TBV]:** placement unknown. Ask the reviewers before building it.
-- **OpenRouter Free status [Decision]:** the model selector shows "OpenRouter Free" with a 6px status dot (green, amber or red) in the menu item's subtitle line, e.g. "Free models · Available". This keeps the reference's top-bar layout instead of adding new composer chrome.
+- **OpenRouter Free status [Decision]:** the model selector shows "OpenRouter Free". Once `/models/status` exists (M2), a 6px status dot (green, amber or red) goes in the menu item's subtitle line. This keeps the reference's top-bar layout instead of adding new composer chrome.
 
 ### 4.3 Model selector menu [Observed]
-- **Popover:** white, radius 16, `shadow-popover`, padding 8, width ~360.
-- **Item:**
-  - 20px black rounded-square logo, title (14px/500) and subtitle (13px `--text-secondary`).
-  - Padding 12; hover and selected background `--surface-primary`, radius 8.
-- **[Decision]** A single item: "OpenRouter Free" / "Free models router — picks an available free model". The reference lists Magica Auto, Fast, Flash, Max and Pro Max.
+- **[Observed 2026-10-18]**
+  - **Trigger:** h28, padding 4×8, gap 8, radius 10. A 12px `magica_favicon_black.svg` (with `dark:invert`), the name (14px/400), and a 14px chevron that flips while the popover is open. Hover and open background: `--magica-foundation-surface-hover`.
+  - **Popover:** a role="dialog" popover; 360 wide, radius 16, 1px `--boarder-tertiary`, padding 16, `shadow-md`.
+  - **Item:** h54, padding `8 24 8 12`, gap 10, radius 10, with a 20px logo, title 14px/400, and subtitle 12px `--text-secondary`, all on one line (`whitespace-nowrap`). The selected item has a `--surface-primary` background.
+- **[Decision]** A single item: "OpenRouter Free" / "Picks an available free model for your task". The reference lists Magica Auto, Fast, Flash, Max and Pro Max.
 
 ### 4.4 Empty state [Observed]
 - **Centred stack:**
@@ -279,7 +304,20 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 - **Idea cards:** masonry, 3 columns on desktop and 2 on mobile. Media thumbnail, radius 12, with the title at the bottom on a white fade.
   - Clicking a card **fills the composer** and doesn't send.
   - "See more ideas" button at the end.
-- **Data [Decision]:** a static JSON of ~12 ideas with our own thumbnails, all achievable with our 3 tools. The reference's video-template ideas need tools we don't have, so we mirror the layout, not the content.
+- **Data (user call, 2026-10-18; replaces our own 12 ideas):**
+  - The reference's own 30 "All" ideas (title, prompt, tabs, media) were captured read-only into `src/features/ideas/ideas.json` and Zod-checked at load.
+  - Media comes from the reference's public CDN (`g.tlcdn.com`, `galaxyai.tlcdn.com`). Videos use `preload="none"`, are muted and looping, and play only while hovered or focused (unless reduced motion). Images go through `next/image`.
+  - Tabs filter those 30, so most tabs show a few cards (the reference loads 22–30 per tab from its server). "See more ideas" shows the not-available toast.
+  - Many prompts ask for video models we don't have (Seedance, Kling); the agent will explain what it can do instead.
+- **[Observed 2026-10-18] Exact values:**
+  - **Hero:** a 448-wide stack, padding-top 113 (40 on mobile), 40px mascot.
+  - **Time:** 13px/500, `--text-secondary`, tracking .01em, margin-top 19 (14 on mobile). "PM" is caption-1, shifted by (−3px, −5px). Formatted en-US 12-hour on every locale.
+  - **Heading and tagline:** h1 24/32 bold (20 on mobile), margin-top 4; tagline 14/24, 500 weight, margin-top 8.
+  - **Spacing:** 48 between the hero and the composer, 32 between the composer and the tabs, 32 between the tabs and the cards.
+  - **Tabs:** h34, px10, radius 10, 14/500, spread `justify-between` across 900, scrolling sideways on narrow screens. The active tab is `--surface-secondary` with foreground text.
+  - **Cards:** radius 16, 1px `--boarder-secondary`, `--surface-main-background-2`, `shadow-xs`. Media on top, then a title footer (px8, pt4, pb8, 14/500, one line). Three columns with a 16px gap (two columns, 12px gap, on mobile).
+  - **"See more ideas":** h36, px12, radius 10, 1px border, `--surface-main-background-3`, `shadow-xs`, margin-top 32.
+- **Ours:** all 30 ideas shown at once. Clicking a card sets the new-chat draft in `composerStore`. CSS columns balance the masonry slightly differently from the reference (its third column starts one card earlier).
 
 ### 4.5 Messages [Observed]
 - **User message:**
@@ -295,6 +333,12 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
   - Action row, 28px ghost icons: Copy, Fork chat (out of scope → toast), Good response, Bad response, then the time "12:40 PM" (caption).
 - **Spacing:** ~24px between messages; 40px between a user message and the assistant turn **[Observed approx.]**.
 - **Entry animation:** `chat-fade-in-up` at 200ms.
+- **Chat page states [Decision, not observed]:** our reference session expired before we could check these.
+  - Loading: one bubble-shaped skeleton.
+  - Missing, deleted or someone else's chat (all 404): "Task not found" / "It may have been deleted, or the link is wrong." with a "New task" pill.
+  - Other errors: "Couldn't load this task" with the safe API message.
+  - Signed out: "Sign in to see this task" with a Sign in pill.
+  - `/chat/a/b` renders the not-found page. Under partial prerender the status stays 200 and the page is noindex.
 
 ### 4.6 Step group & step rows — core streaming UI [Observed]
 **Group header** (14/20, `--text-secondary`, hover `--text-primary`, with a chevron-down 12px):
@@ -362,13 +406,23 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
   - Plan label "HOBBY" (caption caps, 600), then "Available Credits" with the balance (16px/700).
   - Primary "Add Credits" (full width, h40), a caption-caps "EXPLORE PLANS" section, a "Compare plans / Find the right plan for you ↗" card, and chips "View usage" and "Billing details".
 - **Task row menu:**
-  - About 180px wide, radius 12, `shadow-lg`, item h34 with radius 8, icon 14px.
-  - Items: Pin to top, Rename, Duplicate, Add to project ›, Delete (danger).
-- **Tooltip:** `#1b1b1b` background, white 10.5px text, radius 6, padding 4×8. Keycaps are 18px with radius 5 at `rgba(255,255,255,.15)` **[TBV]**.
+  - **[Observed 2026-10-18]** 180px wide, radius 10, padding 5, white, shadow `0 4px 12px rgba(0,0,0,.14)`. Items h32, radius 8, padding `0 9px`, gap 8, 14px `#5e5e5e` (the focused item is `--text-primary`); icons 16px at stroke 1.5.
+  - Items: **Pin to top** (tabler `pin`) — or **Unpin** (tabler `pinned-off`) when pinned — **Rename** (tabler `pencil`), **Duplicate** (tabler `copy`), **Add to project** (lucide `folder-input`, ›), **Delete** (tabler `trash`, `#dc2626`).
+- **Tooltip [Observed 2026-10-18]:** `#1b1b1b` background, 1px `--magica-tooltip-border`, `#f7f7f7` text at 10.5px/600 (line-height 15.75), radius 6, no arrow, 4px from the trigger. The reference pads `4 4 4 8`; ours pads 4×8 on both sides (user call: the 4px right edge looked cramped). Composer tooltips show the button's own name ("Attach files", "Connect apps", "Dictation"), and the empty Send shows "Add a message first". Keycaps are 18px with radius 5 at `rgba(255,255,255,.15)` **[TBV]**.
 
-### 4.10 Search dialog (⌘/Ctrl+K) [Observed sizes · TBV content]
-- 512 × 370: header 44 (input with search icon), results 270, footer 48 (keycap hints such as `Esc` in a 29px keycap). Action gap 6.
-- Result row and snippet highlight **[TBV]**.
+### 4.10 Search dialog (⌘/Ctrl+K) [Observed 2026-10-18]
+- **Dialog:** 512 × 370, white, radius 24, Tailwind `shadow-lg` (`0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1)`). Accessible name "Search tasks", description "Search your recent tasks and open an existing task or start a new one."
+- **Header (44):** lucide `search` icon, input (14px, h40, placeholder **"Search"**, aria "Search projects and tasks"), and an `esc` keycap button (aria "Close") on the right.
+- **Results panel:** a `--surface-primary` rounded panel (radius ~16) holding a listbox "Suggestions" with a caption group label **"Tasks"**.
+  - **Row:** h40, pill (radius 999), px 16, 14px `--text-secondary`, lucide `message-circle` at the compact icon size; the **selected/hovered row is white** (`--surface-main-background`). Shows the **title only**, with the matched text in **bold** (`font-weight: 700`) — no snippet line.
+  - Empty query lists recent tasks. After results: centred caption **"End of search results"** (`--text-secondary`).
+- **Footer (48):** right-aligned "New task" with keycaps `Ctrl` `Shift` `O`.
+- ↑/↓ move the selection, Enter opens, Esc closes.
+- **Ours:**
+  - The results panel is inset 4px. Keycaps are grey sans-serif pills (`--surface-secondary`, 18px, radius 5). The footer "New task" is `--text-primary`.
+  - Typing is debounced 200ms; an empty query lists the sidebar's cached first page. Search covers titles and message text (substring, DEC-049), first page only.
+  - The open dialog is built per open, so it starts empty each time. ⌘K toggles it.
+  - **[Decision]** Empty results: "No tasks found". The overlay uses the drawer's tint + 3px blur **[TBV]**.
 
 ### 4.11 Approval / waitpoint overlay [TBV — not observed]
 **[Decision]**, until verified against the reference:
@@ -385,9 +439,24 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 - Cancelled turns read "Stopped" in `--text-tertiary`, with no error colour.
 - Free-model unavailable: "Free models are busy right now. Try again in a minute."
 
-### 4.13 Toasts [Decision]
-- Use shadcn **Sonner**, bottom-right on desktop and top on mobile. Dark `#1b1b1b` surface, 14px. The reference has a "Notifications (F8)" region.
-- Used for out-of-scope affordances ("Not available in this build"), copy confirmations and non-blocking errors.
+### 4.13 Toasts [Observed 2026-10-18]
+- **Look:** shadcn **Sonner** at the **top right**. A white card (about 386px wide, radius 16, `shadow-lg`, 1px `--boarder-tertiary`) with a 14px semibold title, a 14px `--text-secondary` description, and a close ✕. The reference's region is "Notifications (F8)".
+- **Observed copy:** after Duplicate, "Task duplicated" / "The copied task and its message history are ready." Rename and Delete show no toast.
+- **[Decision]** Also used for out-of-scope affordances ("Not available in this build") and for non-blocking errors (the `ApiError` message, which is user-safe, plus a generic fallback).
+
+### 4.14 Task actions [Observed 2026-10-18]
+- **Rename:** inline. The row becomes a pencil icon plus an input (placeholder "Untitled task", text pre-selected, ring `--boarder-action`). Enter or blur saves; Escape cancels. No toast.
+- **Duplicate:** a "Duplicate task" dialog first.
+  - Panel: 448 wide, padding 24, radius 16, 1px `--boarder-tertiary`, `shadow-lg`, gap 16. The backdrop is a 3px blur with no tint.
+  - Title (14/600), then "Create an exact copy of the task “<title>” and all its messages."
+  - A "Complete task copy" card (lucide `copy`, radius 10, padding 16), with the text "All messages will be copied to a new task. The original task will remain unchanged."
+  - Buttons: "Cancel" (outlined) and "Duplicate task" (`#2b2b2b`, lucide `copy`), both h34 with radius 10, plus a close ✕.
+  - On confirm it **navigates to the copy**, titled **"<title> - Copy"**, which appears at the top of Recent, and shows the toast above.
+- **Delete:** a "Delete task?" **alertdialog**.
+  - Panel: 512 wide; title 18/600; body "This task will be permanently deleted and cannot be recovered."
+  - Backdrop `--surface-overlay-control` with a 3px blur.
+  - Buttons: "Cancel" (outlined pill, h36) and "Delete" (`--magica-foundation-danger` pill, h36).
+  - No toast. Deleting the open chat navigates to `/chat`.
 
 ---
 
@@ -407,7 +476,7 @@ On send from the empty state:
 2. Within about a second it becomes the truncated first prompt.
 3. After the first turn it becomes the AI title.
 
-The URL changes to `/chat/<id>` without a full reload, and the document title becomes `<title> | Magica`. **[Decision]** Ours is `<title> | Agent Chat`.
+The URL changes to `/chat/<id>` without a full reload, and the document title becomes `<title> | Magica`. Ours matches: "Magica" by default, `<title> | Magica` on a chat, with the reference favicon (user call, 2026-10-18).
 
 ### 5.3 Keyboard [Observed + Decision]
 | Keys | Action |
@@ -467,9 +536,11 @@ The URL changes to `/chat/<id>` without a full reload, and the document title be
 - [ ] Insufficient-credits copy and placement
 - [ ] Attachment chips in the composer and on user messages
 - [ ] Video and audio result cards
-- [ ] Search dialog results UI
-- [ ] Mobile thread, drawer trigger and breakpoint
+- [x] Search dialog results UI (2026-10-18, §4.10)
+- [x] Mobile drawer trigger and breakpoint (2026-10-18, §3.1) — mobile *thread* still open (M2)
 - [ ] Dark-mode thread
-- [ ] Composer focus state
+- [x] Composer focus state (2026-10-18, §4.2)
+- [x] New-task keycap on hover; paperclip/mic icon names (2026-10-18, §3.2, §4.2)
+- [x] Pinned-row styling: separate "Pinned tasks" section (2026-10-18, §3.2); row menu values (§4.9)
 - [ ] Files modal radius and empty state
 - [ ] Credit rounding rules

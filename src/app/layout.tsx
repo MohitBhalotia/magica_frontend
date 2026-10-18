@@ -12,7 +12,8 @@ const figtree = Figtree({
   variable: "--font-body",
 });
 
-export const metadata: Metadata = { title: "Agent Chat" };
+// The reference's name and favicon (src/app/favicon.ico), at the user's request.
+export const metadata: Metadata = { title: "Magica" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

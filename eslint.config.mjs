@@ -18,6 +18,18 @@ export default defineConfig([
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/consistent-type-definitions": ["error", "type"], // RULES §2
       "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "cn",
+              message:
+                "Import cn from @/lib/utils (it knows our text-* sizes). shadcn adds the bare import.",
+            },
+          ],
+        },
+      ],
       // eslint-plugin-import ships with eslint-config-next, so no import-x dependency
       "import/no-cycle": "error",
       "import/no-default-export": "error",

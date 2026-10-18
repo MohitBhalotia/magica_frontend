@@ -1,6 +1,6 @@
 # AGENTS.md — magica_frontend (frontend)
 
-Next.js App Router frontend for the Agent Chat clone. It talks to the `magica_backend` backend (a separate repo) over REST, plus Trigger.dev Realtime.
+Next.js App Router frontend for the Magica clone. It talks to the `magica_backend` backend (a separate repo) over REST, plus Trigger.dev Realtime.
 In the planning workspace, read `../MEMORY.md` first (project context) and update it on important instructions or decisions.
 **Read [`RULES.md`](RULES.md) before writing any code.** It holds the coding conventions, naming, errors and testing rules.
 **Read [`DESIGN.md`](DESIGN.md) before any UI work.** It is the design system and UI behaviour spec: tokens, components, states and motion.
