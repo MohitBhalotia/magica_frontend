@@ -7,11 +7,17 @@ test("/ redirects to the chat shell with Clerk sign-in", async ({ page }) => {
   await expect(page.getByRole("banner").getByRole("button", { name: /sign in/i })).toBeVisible();
 });
 
-// The shell streams before notFound() runs (partial prerender), so the status stays 200 and
-// Next marks the page noindex; the not-found UI is what users get.
-test("/chat/a/b is not a chat: not-found page", async ({ page }) => {
-  await page.goto("/chat/a/b");
-  await expect(page.getByText("This page could not be found.")).toBeVisible();
+test("/chat/a/b matches no route: a real 404", async ({ page }) => {
+  const res = await page.goto("/chat/a/b");
+  expect(res?.status()).toBe(404);
+});
+
+// Regression: on Vercel the old optional catch-all served the /chat prerender (empty state) for
+// every chat URL on a full load. A chat URL must never render the empty state.
+test("a chat URL loads the chat view, not the empty state", async ({ page }) => {
+  await page.goto("/chat/00000000-0000-4000-8000-000000000000");
+  await expect(page.getByRole("heading", { name: "Sign in to see this task" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your AI worker" })).toHaveCount(0);
 });
 
 test("mobile: the sidebar opens as a drawer", async ({ page }) => {

@@ -118,7 +118,9 @@ export function SidebarFooter() {
           showName
           appearance={{
             elements: {
-              rootBox: "w-full",
+              // Clerk's root sizes to its content; full width makes the hover row match "More"
+              // (and right-aligns the name like the reference). User call, 2026-10-19.
+              rootBox: "flex! w-full!",
               userButtonTrigger:
                 "h-(--magica-control-height)! w-full! rounded-radius-l! px-space-03! hover:bg-surface-secondary!",
               userButtonBox: "w-full! flex-row-reverse! justify-between!",

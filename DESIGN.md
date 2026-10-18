@@ -338,7 +338,7 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
   - Missing, deleted or someone else's chat (all 404): "Task not found" / "It may have been deleted, or the link is wrong." with a "New task" pill.
   - Other errors: "Couldn't load this task" with the safe API message.
   - Signed out: "Sign in to see this task" with a Sign in pill.
-  - `/chat/a/b` renders the not-found page. Under partial prerender the status stays 200 and the page is noindex.
+  - `/chat` and `/chat/<id>` are separate routes. `/chat/a/b` matches neither, so it returns a real 404. The original optional catch-all made Vercel serve the empty state for chat URLs on a full page load (found in the live check on 2026-10-19).
 
 ### 4.6 Step group & step rows — core streaming UI [Observed]
 **Group header** (14/20, `--text-secondary`, hover `--text-primary`, with a chevron-down 12px):

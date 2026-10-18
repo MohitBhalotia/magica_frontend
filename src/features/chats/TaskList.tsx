@@ -30,7 +30,7 @@ const SKELETON_WIDTHS = [
 export function TaskList({ onNavigate }: { onNavigate?: () => void }) {
   const { isSignedIn } = useAuth();
   const { data, isPending, hasNextPage, isFetchingNextPage, fetchNextPage } = useChatList();
-  const { chatId } = useParams<{ chatId?: string[] }>();
+  const { chatId } = useParams<{ chatId?: string }>();
   const sentinel = useRef<HTMLDivElement>(null);
 
   // Loads the next page when the end of the list scrolls into view.
@@ -74,7 +74,7 @@ export function TaskList({ onNavigate }: { onNavigate?: () => void }) {
 
   const row = (chat: ChatSummary) => (
     <li key={chat.id} className="mb-space-01 last:mb-0">
-      <TaskRow chat={chat} active={chat.id === chatId?.[0]} onNavigate={onNavigate} />
+      <TaskRow chat={chat} active={chat.id === chatId} onNavigate={onNavigate} />
     </li>
   );
   const pinned = chats.filter((c) => c.isPinned);
