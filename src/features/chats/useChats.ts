@@ -1,0 +1,112 @@
+"use client";
+
+import { useAuth } from "@clerk/nextjs";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import type { ChatList, UpdateChatRequest } from "@mohitbhalotia/magica-contracts";
+
+import { deleteChat, duplicateChat, listChats, updateChat } from "@/services/chats.service";
+import { ApiError } from "@/services/http";
+
+type Pages = InfiniteData<ChatList, string | undefined>;
+
+/** Per user, so one account never sees another's cached list after a switch. */
+export const chatListKey = (userId: string | null | undefined) => ["chats", userId] as const;
+
+const showError = (error: Error) => {
+  toast.error(
+    error instanceof ApiError ? error.message : "Something went wrong. Please try again.",
+  );
+};
+
+/** Sidebar list, pinned first then most recent (server order), 20 per page. */
+export function useChatList() {
+  const { isSignedIn, userId, getToken } = useAuth();
+  return useInfiniteQuery({
+    queryKey: chatListKey(userId),
+    queryFn: async ({ pageParam }) => listChats(pageParam, await getToken()),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    enabled: isSignedIn === true,
+  });
+}
+
+/** Rename or pin. The sidebar updates at once; the old list comes back if the server says no. */
+export function useUpdateChat() {
+  const queryClient = useQueryClient();
+  const { userId, getToken } = useAuth();
+  const queryKey = chatListKey(userId);
+  return useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: UpdateChatRequest }) =>
+      updateChat(id, patch, await getToken()),
+    onMutate: async ({ id, patch }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<Pages>(queryKey);
+      queryClient.setQueryData<Pages>(queryKey, (old) =>
+        old
+          ? {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                items: page.items.map((c) => (c.id === id ? { ...c, ...patch } : c)),
+              })),
+            }
+          : old,
+      );
+      return { previous };
+    },
+    onError: (error, _vars, context) => {
+      queryClient.setQueryData(queryKey, context?.previous);
+      showError(error);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+}
+
+/** Delete. The row disappears at once; it comes back if the server says no. */
+export function useDeleteChat() {
+  const queryClient = useQueryClient();
+  const { userId, getToken } = useAuth();
+  const queryKey = chatListKey(userId);
+  return useMutation({
+    mutationFn: async (id: string) => deleteChat(id, await getToken()),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<Pages>(queryKey);
+      queryClient.setQueryData<Pages>(queryKey, (old) =>
+        old
+          ? {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                items: page.items.filter((c) => c.id !== id),
+              })),
+            }
+          : old,
+      );
+      return { previous };
+    },
+    onError: (error, _id, context) => {
+      queryClient.setQueryData(queryKey, context?.previous);
+      showError(error);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+}
+
+/** Not optimistic: the copy's id comes from the server. Callers navigate in `onSuccess`. */
+export function useDuplicateChat() {
+  const queryClient = useQueryClient();
+  const { userId, getToken } = useAuth();
+  return useMutation({
+    mutationFn: async (id: string) => duplicateChat(id, await getToken()),
+    onError: showError,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: chatListKey(userId) }),
+  });
+}

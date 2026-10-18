@@ -3,7 +3,9 @@
 import { IconLayoutSidebar } from "@tabler/icons-react";
 import { CirclePlus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 
+import { TaskList } from "@/features/chats/TaskList";
 import { Logo } from "@/features/shell/Logo";
 import { SidebarFooter } from "@/features/shell/SidebarFooter";
 import { ICON_BUTTON, NAV_ITEMS, notAvailable, ROW } from "@/features/shell/nav";
@@ -71,6 +73,10 @@ export function SidebarContent({
             </li>
           ))}
         </ul>
+        {/* The active row depends on the URL, so it renders per request, after the static shell. */}
+        <Suspense>
+          <TaskList onNavigate={onNavigate} />
+        </Suspense>
       </div>
 
       <SidebarFooter />

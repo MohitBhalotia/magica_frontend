@@ -408,9 +408,24 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 - Cancelled turns read "Stopped" in `--text-tertiary`, with no error colour.
 - Free-model unavailable: "Free models are busy right now. Try again in a minute."
 
-### 4.13 Toasts [Decision]
-- Use shadcn **Sonner**, bottom-right on desktop and top on mobile. Dark `#1b1b1b` surface, 14px. The reference has a "Notifications (F8)" region.
-- Used for out-of-scope affordances ("Not available in this build"), copy confirmations and non-blocking errors.
+### 4.13 Toasts [Observed 2026-10-18]
+- **Look:** shadcn **Sonner** at the **top right**. A white card (about 386px wide, radius 16, `shadow-lg`, 1px `--boarder-tertiary`) with a 14px semibold title, a 14px `--text-secondary` description, and a close ✕. The reference's region is "Notifications (F8)".
+- **Observed copy:** after Duplicate, "Task duplicated" / "The copied task and its message history are ready." Rename and Delete show no toast.
+- **[Decision]** Also used for out-of-scope affordances ("Not available in this build") and for non-blocking errors (the `ApiError` message, which is user-safe, plus a generic fallback).
+
+### 4.14 Task actions [Observed 2026-10-18]
+- **Rename:** inline. The row becomes a pencil icon plus an input (placeholder "Untitled task", text pre-selected, ring `--boarder-action`). Enter or blur saves; Escape cancels. No toast.
+- **Duplicate:** a "Duplicate task" dialog first.
+  - Panel: 448 wide, padding 24, radius 16, 1px `--boarder-tertiary`, `shadow-lg`, gap 16. The backdrop is a 3px blur with no tint.
+  - Title (14/600), then "Create an exact copy of the task “<title>” and all its messages."
+  - A "Complete task copy" card (lucide `copy`, radius 10, padding 16), with the text "All messages will be copied to a new task. The original task will remain unchanged."
+  - Buttons: "Cancel" (outlined) and "Duplicate task" (`#2b2b2b`, lucide `copy`), both h34 with radius 10, plus a close ✕.
+  - On confirm it **navigates to the copy**, titled **"<title> - Copy"**, which appears at the top of Recent, and shows the toast above.
+- **Delete:** a "Delete task?" **alertdialog**.
+  - Panel: 512 wide; title 18/600; body "This task will be permanently deleted and cannot be recovered."
+  - Backdrop `--surface-overlay-control` with a 3px blur.
+  - Buttons: "Cancel" (outlined pill, h36) and "Delete" (`--magica-foundation-danger` pill, h36).
+  - No toast. Deleting the open chat navigates to `/chat`.
 
 ---
 

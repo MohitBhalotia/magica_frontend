@@ -24,13 +24,21 @@ const Toaster = ({ ...props }: ToasterProps) => {
         error: <OctagonXIcon className="size-4" />,
         loading: <Loader2Icon className="size-4 animate-spin" />,
       }}
-      // DESIGN §4.13: dark #1b1b1b toasts, 14px, in both themes (reference tokens, not shadcn's).
+      // DESIGN §4.13 (observed): white card, top right, 14px semibold title + secondary description.
+      position="top-right"
+      closeButton
+      toastOptions={{
+        classNames: {
+          title: "text-small! font-semibold!",
+          description: "text-small! text-text-secondary!",
+        },
+      }}
       style={
         {
-          "--normal-bg": "var(--magica-tooltip-surface)",
-          "--normal-text": "var(--text-on-inverse)",
-          "--normal-border": "transparent",
-          "--border-radius": "var(--radius-xl)",
+          "--normal-bg": "var(--surface-main-background)",
+          "--normal-text": "var(--text-primary)",
+          "--normal-border": "var(--boarder-tertiary)",
+          "--border-radius": "var(--radius-xxl)",
           fontSize: "var(--font-size-body)",
         } as React.CSSProperties
       }

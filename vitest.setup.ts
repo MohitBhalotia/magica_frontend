@@ -10,9 +10,15 @@ import { server } from "@/mocks/server";
 vi.mock("next/navigation", async () => {
   // vi.mock is hoisted above static imports, so load the shared router here.
   const { router } = await import("@/test/router");
-  return { useRouter: () => router, usePathname: () => "/chat" };
+  return { useRouter: () => router, usePathname: () => "/chat", useParams: () => ({}) };
 });
 vi.mock("@clerk/nextjs", () => ({
+  // Signed out by default; list tests override with vi.mocked(useAuth).mockReturnValue(...).
+  useAuth: vi.fn(() => ({
+    isSignedIn: false,
+    userId: null,
+    getToken: () => Promise.resolve(null),
+  })),
   Show: ({ when, children }: { when: string; children: ReactNode }) =>
     when === "signed-out" ? children : null,
   SignInButton: ({ children }: { children?: ReactNode }) => children,
@@ -29,6 +35,21 @@ window.matchMedia = (query) => ({
   addListener: () => undefined,
   removeListener: () => undefined,
   dispatchEvent: () => false,
+});
+
+// Browser APIs jsdom lacks: Radix popper sizing, pointer capture, menu scrolling, and the
+// task list's load-on-scroll observer (never fires in tests).
+class NoopObserver {
+  observe = () => undefined;
+  unobserve = () => undefined;
+  disconnect = () => undefined;
+}
+globalThis.ResizeObserver = NoopObserver;
+globalThis.IntersectionObserver = NoopObserver as unknown as typeof IntersectionObserver;
+Object.assign(Element.prototype, {
+  hasPointerCapture: () => false,
+  releasePointerCapture: () => undefined,
+  scrollIntoView: () => undefined,
 });
 
 // Any request a test didn't mock fails loudly instead of hitting a real API.

@@ -1,16 +1,17 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { beforeEach, expect, it } from "vitest";
 
 import { AppSidebar } from "@/features/shell/AppSidebar";
 import { useUiStore } from "@/stores/uiStore";
+import { renderWithProviders } from "@/test/render";
 
 beforeEach(() => {
   useUiStore.setState({ drawerOpen: false, sidebarCollapsed: false });
 });
 
 it("shows the drawer when the store opens it, and Esc closes it", async () => {
-  render(<AppSidebar />);
+  renderWithProviders(<AppSidebar />);
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
   act(() => {
@@ -23,7 +24,7 @@ it("shows the drawer when the store opens it, and Esc closes it", async () => {
 });
 
 it("collapses to the rail and opens again", async () => {
-  render(<AppSidebar />);
+  renderWithProviders(<AppSidebar />);
 
   await userEvent.click(screen.getByRole("button", { name: "Close sidebar" }));
   expect(useUiStore.getState().sidebarCollapsed).toBe(true);
