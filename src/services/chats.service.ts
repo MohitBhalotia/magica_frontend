@@ -5,6 +5,7 @@ import {
   ChatListSchema,
   ChatSummarySchema,
   CreateChatResponseSchema,
+  SearchResultListSchema,
   type CreateChatRequest,
   type UpdateChatRequest,
 } from "@mohitbhalotia/magica-contracts";
@@ -18,6 +19,10 @@ export const listChats = (cursor: string | undefined, token: Token) =>
   request(`/api/v1/chats${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`, ChatListSchema, {
     token,
   });
+
+/** Titles and message text, case-insensitive substring (DEC-049); first page only in the dialog. */
+export const searchChats = (q: string, token: Token) =>
+  request(`/api/v1/chats/search?q=${encodeURIComponent(q)}`, SearchResultListSchema, { token });
 
 /** The chat plus its newest messages (newest first). Not yours or deleted → 404 NOT_FOUND. */
 export const getChat = (id: string, token: Token) =>

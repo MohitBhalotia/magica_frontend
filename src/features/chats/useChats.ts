@@ -23,6 +23,7 @@ import {
   duplicateChat,
   getChat,
   listChats,
+  searchChats,
   updateChat,
 } from "@/services/chats.service";
 import { ApiError } from "@/services/http";
@@ -47,6 +48,18 @@ export function useChatList() {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
     enabled: isSignedIn === true,
+  });
+}
+
+/** Search results for a (debounced) query; an empty query runs nothing. */
+export function useChatSearch(q: string) {
+  const { isSignedIn, userId, getToken } = useAuth();
+  return useQuery({
+    queryKey: ["chat-search", userId, q],
+    queryFn: async () => searchChats(q, await getToken()),
+    enabled: isSignedIn === true && q !== "",
+    // Keep the last results on screen while the next query loads (no flicker per keystroke).
+    placeholderData: (previous) => previous,
   });
 }
 

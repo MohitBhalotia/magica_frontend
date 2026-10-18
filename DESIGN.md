@@ -414,6 +414,11 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
   - Empty query lists recent tasks. After results: centred caption **"End of search results"** (`--text-secondary`).
 - **Footer (48):** right-aligned "New task" with keycaps `Ctrl` `Shift` `O`.
 - ↑/↓ move the selection, Enter opens, Esc closes.
+- **Ours:**
+  - The results panel is inset 4px. Keycaps are grey sans-serif pills (`--surface-secondary`, 18px, radius 5). The footer "New task" is `--text-primary`.
+  - Typing is debounced 200ms; an empty query lists the sidebar's cached first page. Search covers titles and message text (substring, DEC-049), first page only.
+  - The open dialog is built per open, so it starts empty each time. ⌘K toggles it.
+  - **[Decision]** Empty results: "No tasks found". The overlay uses the drawer's tint + 3px blur **[TBV]**.
 
 ### 4.11 Approval / waitpoint overlay [TBV — not observed]
 **[Decision]**, until verified against the reference:

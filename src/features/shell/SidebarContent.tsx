@@ -9,6 +9,7 @@ import { TaskList } from "@/features/chats/TaskList";
 import { Logo } from "@/features/shell/Logo";
 import { SidebarFooter } from "@/features/shell/SidebarFooter";
 import { ICON_BUTTON, NAV_ITEMS, notAvailable, ROW } from "@/features/shell/nav";
+import { useUiStore } from "@/stores/uiStore";
 
 /** Expanded sidebar body, shared by the inline card and the mobile drawer (DESIGN §3.2). */
 export function SidebarContent({
@@ -20,6 +21,7 @@ export function SidebarContent({
   onNavigate?: () => void;
 }) {
   const router = useRouter();
+  const setSearchOpen = useUiStore((s) => s.setSearchOpen);
   const newTask = () => {
     router.push("/chat");
     onNavigate?.();
@@ -37,8 +39,14 @@ export function SidebarContent({
           <Logo />
         </button>
         <div className="flex gap-space-01">
-          {/* Opens the search dialog (F8). */}
-          <button type="button" aria-label="Search" className={ICON_BUTTON}>
+          <button
+            type="button"
+            aria-label="Search"
+            onClick={() => {
+              setSearchOpen(true);
+            }}
+            className={ICON_BUTTON}
+          >
             <Search />
           </button>
           <button

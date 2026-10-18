@@ -16,6 +16,7 @@ const RAIL_BUTTON =
 export function SidebarRail() {
   const router = useRouter();
   const setCollapsed = useUiStore((s) => s.setSidebarCollapsed);
+  const setSearchOpen = useUiStore((s) => s.setSearchOpen);
 
   return (
     <nav aria-label="Sidebar" className="flex h-full flex-col items-center py-space-03">
@@ -31,7 +32,14 @@ export function SidebarRail() {
         <LogoMark className="transition-opacity group-hover/expand:opacity-0 group-focus-visible/expand:opacity-0" />
         <IconLayoutSidebar className="absolute opacity-0 transition-opacity group-hover/expand:opacity-100 group-focus-visible/expand:opacity-100" />
       </button>
-      <button type="button" aria-label="Search" className={`${ICON_BUTTON} mt-space-05`}>
+      <button
+        type="button"
+        aria-label="Search"
+        onClick={() => {
+          setSearchOpen(true);
+        }}
+        className={`${ICON_BUTTON} mt-space-05`}
+      >
         <Search />
       </button>
       <ul className="mt-space-02 flex flex-col gap-space-02">

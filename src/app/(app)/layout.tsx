@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { SearchDialog } from "@/features/chats/SearchDialog";
 import { AppSidebar } from "@/features/shell/AppSidebar";
 import { TopBar } from "@/features/shell/TopBar";
 
@@ -15,6 +16,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </Suspense>
         <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
       </div>
+      <SearchDialog />
     </div>
   );
 }

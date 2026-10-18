@@ -6,6 +6,8 @@ type UiState = {
   // shortcut: not persisted across reloads, persist it if users ask for it to stick.
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  searchOpen: boolean;
+  setSearchOpen: (open: boolean) => void;
 };
 
 export const useUiStore = create<UiState>()((set) => ({
@@ -16,5 +18,9 @@ export const useUiStore = create<UiState>()((set) => ({
   sidebarCollapsed: false,
   setSidebarCollapsed: (sidebarCollapsed) => {
     set({ sidebarCollapsed });
+  },
+  searchOpen: false,
+  setSearchOpen: (searchOpen) => {
+    set({ searchOpen });
   },
 }));
