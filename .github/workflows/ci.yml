@@ -9,7 +9,8 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel a main run: it may be mid-deploy.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   ci:
@@ -60,3 +61,31 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: pnpm audit --prod --audit-level high
+
+  # Built in Actions (not by Vercel's git integration) so the contracts install can use GITHUB_TOKEN.
+  deploy:
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      packages: read
+    env:
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: "@mohitbhalotia"
+      - name: Deploy app to Vercel (env vars come from the Vercel project)
+        run: |
+          pnpm dlx vercel@64.5.0 pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm dlx vercel@64.5.0 build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          pnpm dlx vercel@64.5.0 deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
