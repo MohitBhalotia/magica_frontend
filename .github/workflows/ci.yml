@@ -14,6 +14,9 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read # install @mohitbhalotia/magica-contracts from GitHub Packages
     env:
       # Clerk decodes the publishable key while prerendering, so build and e2e need the real dev keys.
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
@@ -28,7 +31,12 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+          # Writes a user-level .npmrc reading NODE_AUTH_TOKEN (pnpm ignores tokens in the repo .npmrc).
+          registry-url: https://npm.pkg.github.com
+          scope: "@mohitbhalotia"
       - run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm format:check
