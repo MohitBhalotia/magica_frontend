@@ -4,6 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { useState, type ReactNode } from "react";
 
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+
 /** Client-side providers. One QueryClient per browser tab (useState keeps it across renders). */
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -12,7 +15,10 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     // System / Light / Dark via the `.dark` class (DESIGN.md §7).
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>{children}</TooltipProvider>
+        <Toaster />
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }
