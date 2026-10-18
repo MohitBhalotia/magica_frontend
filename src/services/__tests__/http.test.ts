@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw/http";
 import { describe, expect, it } from "vitest";
 
-import { HealthResponseSchema } from "@agent-chat/contracts";
+import { HealthResponseSchema } from "@mohitbhalotia/magica-contracts";
 
 import { server } from "@/mocks/server";
 import { getHealth } from "@/services/health.service";

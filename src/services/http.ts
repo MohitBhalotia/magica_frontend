@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import { ErrorEnvelopeSchema, type ErrorEnvelope } from "@agent-chat/contracts";
+import { ErrorEnvelopeSchema, type ErrorEnvelope } from "@mohitbhalotia/magica-contracts";
 
 import { env } from "@/lib/env";
 

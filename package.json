@@ -29,7 +29,7 @@
     "*.{json,yaml,yml,css}": "prettier --write"
   },
   "dependencies": {
-    "@agent-chat/contracts": "link:../magica_backend/packages/contracts",
+    "@mohitbhalotia/magica-contracts": "link:../magica_backend/packages/contracts",
     "@clerk/nextjs": "7.9.15",
     "@tanstack/react-query": "5.104.3",
     "next": "16.4.2",

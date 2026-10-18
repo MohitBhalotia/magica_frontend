@@ -1,4 +1,4 @@
-import { HealthResponseSchema } from "@agent-chat/contracts";
+import { HealthResponseSchema } from "@mohitbhalotia/magica-contracts";
 
 import { request } from "@/services/http";
 
