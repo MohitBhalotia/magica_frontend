@@ -170,8 +170,8 @@ importers:
         specifier: 7.9.15
         version: 7.9.15(next@16.4.2(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@mohitbhalotia/magica-contracts':
-        specifier: link:../magica_backend/packages/contracts
-        version: link:../magica_backend/packages/contracts
+        specifier: 0.1.0
+        version: 0.1.0(zod@4.6.7)
       '@tanstack/react-query':
         specifier: 5.104.3
         version: 5.104.3(react@19.3.1)
@@ -815,6 +815,11 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@mohitbhalotia/magica-contracts@0.1.0':
+    resolution: {integrity: sha512-QRE2puH/0A2Zo3YJYwvi6R8gBjnFLtlpJWT56LjUCIy4AzIUnlK3gRVAE1L/I0gKBUXLyGJz7wxlwXjVTGUe4Q==, tarball: https://npm.pkg.github.com/download/@mohitbhalotia/magica-contracts/0.1.0/7f2ea395371b6c3d82304b3c1fe20ffd633dcab7}
+    peerDependencies:
+      zod: ^4.6.0
 
   '@msw/url@0.1.2':
     resolution: {integrity: sha512-DdeBLQxQ+ZrtmwEmaj7GQ7lbzPCgbbbyAqOz/I4ulo68hwBpfdNvQJ5bmihJUkAAKOeCmqCIG3OFZGosqFN4mA==}
@@ -3926,6 +3931,10 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
+
+  '@mohitbhalotia/magica-contracts@0.1.0(zod@4.6.7)':
+    dependencies:
+      zod: 4.6.7
 
   '@msw/url@0.1.2': {}
 
