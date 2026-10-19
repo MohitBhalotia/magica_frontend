@@ -50,8 +50,11 @@ export function useLiveTurn(chatId: string, run: RunHandle) {
   const { parts } = useRealtimeStream<UIMessageChunk>(run.triggerRunId ?? "", UI_STREAM, {
     ...options,
     throttleInMs: 50,
-    // A Magica step can wait up to 15 minutes in silence (DEC-054); the default 60s would drop it.
-    timeoutInSeconds: 15 * 60,
+    // A Magica step can wait minutes in silence (DEC-054); the default 60s would drop it.
+    // shortcut: 600s is the API's maximum (a larger value is a 400); a step silent for longer than
+    // that ends the live view and the saved message appears when the run ends. Add a heartbeat if
+    // runs that long become common.
+    timeoutInSeconds: 600,
   });
   useRealtimeRun(run.triggerRunId ?? undefined, {
     ...options,
