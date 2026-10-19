@@ -83,6 +83,22 @@ export function useChat(id: string) {
   });
 }
 
+/**
+ * Messages older than the chat's first page, a page at a time, fetched only once `wanted` (the
+ * reader scrolled near the top). Keyed by the first page's cursor: when new messages push that
+ * page along, the older pages start over, so nothing falls into a gap between them.
+ */
+export function useOlderMessages(id: string, firstCursor: string | null, wanted: boolean) {
+  const { isSignedIn, userId, getToken } = useAuth();
+  return useInfiniteQuery({
+    queryKey: ["chat-older", userId, id, firstCursor],
+    queryFn: async ({ pageParam }) => (await getChat(id, await getToken(), pageParam)).messages,
+    initialPageParam: firstCursor ?? undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    enabled: isSignedIn === true && firstCursor !== null && wanted,
+  });
+}
+
 /** A chat's generated files for the files modal; fetched while the modal is open. */
 export function useChatAssets(chatId: string, enabled: boolean) {
   const { isSignedIn, userId, getToken } = useAuth();

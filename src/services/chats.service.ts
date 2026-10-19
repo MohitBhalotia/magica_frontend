@@ -34,9 +34,16 @@ export const listChatAssets = (chatId: string, cursor: string | undefined, token
 export const searchChats = (q: string, token: Token) =>
   request(`/api/v1/chats/search?q=${encodeURIComponent(q)}`, SearchResultListSchema, { token });
 
-/** The chat plus its newest messages (newest first). Not yours or deleted → 404 NOT_FOUND. */
-export const getChat = (id: string, token: Token) =>
-  request(chatPath(id), ChatDetailSchema, { token });
+/**
+ * The chat plus its newest messages (newest first), or, with `cursor`, the page of messages
+ * older than that. Not yours or deleted → 404 NOT_FOUND.
+ */
+export const getChat = (id: string, token: Token, cursor?: string) =>
+  request(
+    `${chatPath(id)}${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
+    ChatDetailSchema,
+    { token },
+  );
 
 /** First message: the chat, the message and the run answering it. Idempotent per clientMessageId. */
 export const createChat = (body: SendMessageRequest, token: Token) =>
