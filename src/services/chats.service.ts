@@ -4,6 +4,7 @@ import {
   ChatDetailSchema,
   ChatListSchema,
   ChatSummarySchema,
+  RunHandleSchema,
   SearchResultListSchema,
   SendResponseSchema,
   type SendMessageRequest,
@@ -41,6 +42,13 @@ export const sendMessage = (chatId: string, body: SendMessageRequest, token: Tok
   request(`${chatPath(chatId)}/messages`, SendResponseSchema, {
     method: "POST",
     body: JSON.stringify(body),
+    token,
+  });
+
+/** Stop a reply. Idempotent; a reply that already ended comes back as it is. */
+export const cancelRun = (runId: string, token: Token) =>
+  request(`/api/v1/runs/${encodeURIComponent(runId)}/cancel`, RunHandleSchema, {
+    method: "POST",
     token,
   });
 

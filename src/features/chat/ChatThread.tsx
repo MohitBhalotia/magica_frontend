@@ -96,7 +96,7 @@ export function ChatThread({ id }: { id: string }) {
               <ConversationScrollButton />
             </Conversation>
             <div className={`${COLUMN} pb-space-05`}>
-              <Composer chatId={id} />
+              <Composer chatId={id} activeRun={data.activeRun} />
             </div>
           </div>
         )}

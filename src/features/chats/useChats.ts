@@ -11,6 +11,7 @@ import {
 import { toast } from "sonner";
 
 import type {
+  ChatDetail,
   ChatList,
   ChatSummary,
   SendMessageRequest,
@@ -18,6 +19,7 @@ import type {
 } from "@mohitbhalotia/magica-contracts";
 
 import {
+  cancelRun,
   createChat,
   deleteChat,
   duplicateChat,
@@ -136,6 +138,24 @@ export function useSendMessage(chatId: string) {
         queryClient.invalidateQueries({ queryKey: chatKey(userId, chatId) }),
         queryClient.invalidateQueries({ queryKey: chatListKey(userId) }),
       ]),
+  });
+}
+
+/**
+ * Stop the chat's reply. The handle comes back as `stopping`; the live turn sees the run end
+ * (its partial answer saved as cancelled) and refetches the chat.
+ */
+export function useStopRun(chatId: string) {
+  const queryClient = useQueryClient();
+  const { userId, getToken } = useAuth();
+  return useMutation({
+    mutationFn: async (runId: string) => cancelRun(runId, await getToken()),
+    onSuccess: (run) => {
+      queryClient.setQueryData<ChatDetail>(chatKey(userId, chatId), (old) =>
+        old?.activeRun ? { ...old, activeRun: { ...old.activeRun, status: run.status } } : old,
+      );
+    },
+    onError: showError,
   });
 }
 

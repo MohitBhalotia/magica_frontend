@@ -144,6 +144,48 @@ describe("inside a chat", () => {
     expect(useComposerStore.getState().drafts).toEqual({ [NEW_CHAT]: "other draft" });
   });
 
+  it("while a reply runs, Send becomes Stop; Enter doesn't send and Stop cancels the run", async () => {
+    const cancelled: string[] = [];
+    server.use(
+      http.post(`${API}/runs/:runId/cancel`, ({ params }) => {
+        cancelled.push(String(params.runId));
+        return HttpResponse.json({
+          runId: "r1",
+          status: "stopping",
+          triggerRunId: "run_1",
+          publicAccessToken: "pk",
+        });
+      }),
+    );
+    const run = {
+      runId: "r1",
+      status: "working" as const,
+      triggerRunId: "run_1",
+      publicAccessToken: "pk",
+    };
+    renderWithProviders(<Composer chatId="c1" activeRun={run} />);
+    expect(screen.queryByRole("button", { name: "Send message" })).not.toBeInTheDocument();
+
+    await userEvent.type(textbox(), "next question{Enter}");
+    expect(sent).toHaveLength(0);
+    expect(textbox()).toHaveValue("next question"); // still editable
+
+    await userEvent.click(screen.getByRole("button", { name: "Stop" }));
+    await waitFor(() => {
+      expect(cancelled).toEqual(["r1"]);
+    });
+  });
+
+  it("a stopping run shows a busy Stop that can't be pressed again", () => {
+    renderWithProviders(
+      <Composer
+        chatId="c1"
+        activeRun={{ runId: "r1", status: "stopping", triggerRunId: "t", publicAccessToken: "p" }}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Stop" })).toBeDisabled();
+  });
+
   it("a reply still in progress shows the API's message and keeps the draft", async () => {
     server.use(
       http.post(`${API}/chats/c1/messages`, () =>

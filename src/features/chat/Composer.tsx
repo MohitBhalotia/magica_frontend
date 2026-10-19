@@ -2,14 +2,14 @@
 
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { IconPlug } from "@tabler/icons-react";
-import { ArrowUp, Folder, Loader2, Mic, Paperclip } from "lucide-react";
+import { ArrowUp, Folder, Loader2, Mic, Paperclip, Square } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 
-import { MAX_MESSAGE_LENGTH } from "@mohitbhalotia/magica-contracts";
+import { MAX_MESSAGE_LENGTH, type RunHandle } from "@mohitbhalotia/magica-contracts";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useCreateChat, useSendMessage } from "@/features/chats/useChats";
+import { useCreateChat, useSendMessage, useStopRun } from "@/features/chats/useChats";
 import { notAvailable } from "@/features/shell/nav";
 import { cn } from "@/lib/utils";
 import { NEW_CHAT, useComposerStore } from "@/stores/composerStore";
@@ -35,9 +35,10 @@ function Action({ label, children }: { label: string; children: ReactNode }) {
 /**
  * The composer (DESIGN §4.2, observed 2026-10-18). Enter sends, Shift+Enter adds a line; signed
  * out, it asks to sign in. Without `chatId` (empty state) Send creates the chat with its first
- * message and opens it; inside a chat it sends a follow-up.
+ * message and opens it; inside a chat it sends a follow-up, and while a reply is being written
+ * Send becomes Stop (the textarea stays editable).
  */
-export function Composer({ chatId }: { chatId?: string }) {
+export function Composer({ chatId, activeRun }: { chatId?: string; activeRun?: RunHandle | null }) {
   const router = useRouter();
   const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
@@ -47,6 +48,7 @@ export function Composer({ chatId }: { chatId?: string }) {
   const createChat = useCreateChat();
   const reply = useSendMessage(chatId ?? "");
   const mutation = chatId ? reply : createChat;
+  const stop = useStopRun(chatId ?? "");
   const textarea = useRef<HTMLTextAreaElement>(null);
   // Reused until the send succeeds or the text changes, so a retry can't create a second chat.
   const clientMessageId = useRef<string | null>(null);
@@ -65,7 +67,8 @@ export function Composer({ chatId }: { chatId?: string }) {
 
   const empty = text.trim() === "";
   const send = () => {
-    if (empty || mutation.isPending) return;
+    // One reply at a time: Enter waits until the current one is done (the server enforces it too).
+    if (empty || mutation.isPending || activeRun) return;
     if (!isSignedIn) {
       openSignIn();
       return;
@@ -82,6 +85,25 @@ export function Composer({ chatId }: { chatId?: string }) {
       },
     );
   };
+
+  const stopping = activeRun?.status === "stopping" || stop.isPending;
+  const stopButton = activeRun && (
+    <button
+      type="button"
+      aria-label="Stop"
+      disabled={stopping}
+      onClick={() => {
+        stop.mutate(activeRun.runId);
+      }}
+      className="flex size-(--magica-composer-action-control) shrink-0 items-center justify-center rounded-radius-max bg-(--alias-error-a100) text-[#dc2626] transition-opacity outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-boarder-action"
+    >
+      {stopping ? (
+        <Loader2 className="size-(--magica-icon-size) animate-spin" />
+      ) : (
+        <Square className="size-3 fill-current" />
+      )}
+    </button>
+  );
 
   const sendButton = (
     <button
@@ -152,19 +174,20 @@ export function Composer({ chatId }: { chatId?: string }) {
           <Action label="Dictation">
             <Mic />
           </Action>
-          {empty ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                {/* A disabled button gets no pointer events, so the tooltip hangs on a wrapper. */}
-                <span aria-label="Add a message first" className="inline-flex">
-                  {sendButton}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Add a message first</TooltipContent>
-            </Tooltip>
-          ) : (
-            sendButton
-          )}
+          {stopButton ??
+            (empty ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {/* A disabled button gets no pointer events, so the tooltip hangs on a wrapper. */}
+                  <span aria-label="Add a message first" className="inline-flex">
+                    {sendButton}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Add a message first</TooltipContent>
+              </Tooltip>
+            ) : (
+              sendButton
+            ))}
         </div>
       </div>
     </div>
