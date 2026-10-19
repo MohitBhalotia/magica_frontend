@@ -2,6 +2,7 @@
 
 import { IconChartBar, IconCoin, IconSparkles2, IconWallet } from "@tabler/icons-react";
 import Link from "next/link";
+import { useState } from "react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useBalance } from "@/features/credits/useCredits";
@@ -15,9 +16,11 @@ const CHIP =
 export function CreditsPill() {
   const balance = useBalance().data?.balanceMicro;
   const value = balance === undefined ? "–" : formatCredits(balance);
+  // Controlled, so "View usage" can close it: the pill stays mounted across navigation.
+  const [open, setOpen] = useState(false);
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         aria-label={`Credits available: ${value}. Click for plan details.`}
         className="inline-flex h-(--magica-credit-control) items-center gap-space-03 rounded-radius-max border-(length:--border-width-xs) border-boarder-tertiary bg-surface-main-background-2 px-space-04 py-space-02 transition-colors outline-none hover:bg-surface-primary focus-visible:ring-2 focus-visible:ring-boarder-action"
@@ -49,7 +52,13 @@ export function CreditsPill() {
           </button>
         </div>
         <div className="flex gap-space-03">
-          <Link href="/usage" className={CHIP}>
+          <Link
+            href="/usage"
+            className={CHIP}
+            onClick={() => {
+              setOpen(false);
+            }}
+          >
             View usage
             <IconChartBar className="size-4" />
           </Link>
