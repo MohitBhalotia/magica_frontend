@@ -4,6 +4,7 @@ import {
   ChevronDown,
   CircleCheck,
   CircleX,
+  Clock,
   LoaderCircle,
   Search,
   Sparkles,
@@ -11,7 +12,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   MediaToolOutputSchema,
@@ -71,7 +72,7 @@ const STEPS: Record<ToolName, StepLook> = {
     open: true,
     details: (input) => [["Model ID", input.modelId]],
   },
-  crop_image: mediaStep("Crop Image"),
+  crop_image: { ...mediaStep("Crop Image"), label: "Image crop" },
   gpt_image_2: mediaStep("GPT Image 2"),
   merge_videos: mediaStep("Merge Videos"),
 };
@@ -83,13 +84,30 @@ const PARAMS_SHOWN = 3;
 const credits = (micro: number) => `${String(Number((micro / 1_000_000).toFixed(3)))}M`;
 const show = (value: unknown) => (typeof value === "string" ? value : JSON.stringify(value));
 
+/** A step's duration as the reference shows it: `193ms`, `2.2s`, `1m 05s` (DESIGN §4.6). */
+export function duration(ms: number) {
+  if (ms < 1000) return `${String(Math.round(ms))}ms`;
+  if (ms < 59_950) return `${(ms / 1000).toFixed(1)}s`;
+  const seconds = Math.round(ms / 1000);
+  return `${String(Math.floor(seconds / 60))}m ${String(seconds % 60).padStart(2, "0")}s`;
+}
+
 export const toolName = (block: ToolBlock) => block.type.slice("tool-".length) as ToolName;
 
 /**
  * The turn's tool calls as one collapsible group: "Working · N steps" while the turn runs, then
  * "Completed N steps", collapsed (DESIGN §4.6). A saved turn mounts fresh, so it starts collapsed.
  */
-export function ToolSteps({ steps, streaming }: { steps: ToolBlock[]; streaming: boolean }) {
+export function ToolSteps({
+  steps,
+  streaming,
+  toolMs = {},
+}: {
+  steps: ToolBlock[];
+  streaming: boolean;
+  /** Each finished call's duration by `toolCallId` (message metadata). */
+  toolMs?: Record<string, number>;
+}) {
   const [open, setOpen] = useState(streaming);
   const count = `${String(steps.length)} step${steps.length === 1 ? "" : "s"}`;
   return (
@@ -100,14 +118,27 @@ export function ToolSteps({ steps, streaming }: { steps: ToolBlock[]; streaming:
       </CollapsibleTrigger>
       <CollapsibleContent className="mt-space-02 flex flex-col">
         {steps.map((step) => (
-          <StepRow key={step.toolCallId} step={step} streaming={streaming} />
+          <StepRow
+            key={step.toolCallId}
+            step={step}
+            streaming={streaming}
+            ms={toolMs[step.toolCallId]}
+          />
         ))}
       </CollapsibleContent>
     </Collapsible>
   );
 }
 
-function StepRow({ step, streaming }: { step: ToolBlock; streaming: boolean }) {
+function StepRow({
+  step,
+  streaming,
+  ms,
+}: {
+  step: ToolBlock;
+  streaming: boolean;
+  ms: number | undefined;
+}) {
   const look = STEPS[toolName(step)];
   const [open, setOpen] = useState(Boolean(look.open));
   const [allParams, setAllParams] = useState(false);
@@ -123,6 +154,12 @@ function StepRow({ step, streaming }: { step: ToolBlock; streaming: boolean }) {
         <Icon className={cn("size-5 shrink-0 p-0.5", look.iconClass)} aria-hidden />
         {look.label}
         <StepStatus state={step.state} streaming={streaming} />
+        {/* Billed steps show their credits instead of a duration, as on the reference. */}
+        {streaming && step.state === "input-available" ? (
+          <Elapsed />
+        ) : (
+          !creditUsed && ms !== undefined && <Duration ms={ms} />
+        )}
         {creditUsed !== undefined && creditUsed > 0 && (
           <span className="ml-auto font-mono text-caption text-text-secondary tabular-nums">
             {credits(creditUsed)}
@@ -164,6 +201,30 @@ function StepRow({ step, streaming }: { step: ToolBlock; streaming: boolean }) {
       </CollapsibleContent>
     </Collapsible>
   );
+}
+
+function Duration({ ms }: { ms: number }) {
+  return (
+    <span className="flex items-center gap-0.5 font-mono text-caption text-text-secondary/40 tabular-nums">
+      <Clock className="size-2.5" aria-hidden />
+      {duration(ms)}
+    </span>
+  );
+}
+
+/** A running step's live time, counted from when this row first saw it running. */
+function Elapsed() {
+  const [startedAt] = useState(Date.now);
+  const [now, setNow] = useState(startedAt);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(Date.now());
+    }, 100);
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+  return <Duration ms={now - startedAt} />;
 }
 
 /** Running: spinner. Done: green check. Failed: red ✕. Left unfinished by Stop: nothing. */

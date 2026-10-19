@@ -3,6 +3,7 @@ import { userEvent } from "@testing-library/user-event";
 import { expect, it } from "vitest";
 
 import { AssistantParts } from "@/features/chat/AssistantTurn";
+import { duration } from "@/features/chat/ToolSteps";
 import { renderWithProviders } from "@/test/render";
 
 const image = "https://g.tlcdn.com/gen/apple.png";
@@ -28,7 +29,10 @@ const generate = (patch: object = {}) => ({
 it("a finished turn: collapsed 'Completed N steps', the image inline after the text", async () => {
   const user = userEvent.setup();
   renderWithProviders(
-    <AssistantParts parts={[skill, generate(), { type: "text", text: "Here's your apple." }]} />,
+    <AssistantParts
+      parts={[skill, generate(), { type: "text", text: "Here's your apple." }]}
+      metadata={{ toolMs: { c1: 193, c2: 2200 } }}
+    />,
   );
 
   expect(screen.getByText("Completed 2 steps")).toBeInTheDocument();
@@ -43,6 +47,27 @@ it("a finished turn: collapsed 'Completed N steps', the image inline after the t
   expect(screen.getByText("AI Generation")).toBeInTheDocument();
   expect(screen.getByText("0.008M")).toBeInTheDocument();
   expect(screen.getAllByLabelText("Done")).toHaveLength(2);
+  // Each step's duration; a billed step shows its credits instead (as on the reference).
+  expect(screen.getByText("193ms")).toBeInTheDocument();
+  expect(screen.queryByText("2.2s")).not.toBeInTheDocument();
+});
+
+it("formats step durations like the reference", () => {
+  expect(duration(193)).toBe("193ms");
+  expect(duration(2240)).toBe("2.2s");
+  expect(duration(25_500)).toBe("25.5s");
+  expect(duration(59_960)).toBe("1m 00s");
+  expect(duration(65_000)).toBe("1m 05s");
+});
+
+it("labels a crop step 'Image crop'", async () => {
+  const user = userEvent.setup();
+  renderWithProviders(
+    <AssistantParts parts={[generate({ type: "tool-crop_image", output: undefined })]} />,
+  );
+
+  await user.click(screen.getByText("Completed 1 step"));
+  expect(screen.getByText("Image crop")).toBeInTheDocument();
 });
 
 it("a media card shows the model and 3 params, then 'View more'", async () => {
@@ -69,6 +94,7 @@ it("while streaming: 'Working · N steps', a spinner, and a skeleton where the i
 
   expect(screen.getByText("Working · 1 step")).toBeInTheDocument();
   expect(screen.getByLabelText("Running")).toBeInTheDocument();
+  expect(screen.getByText(/^\d+ms$/)).toBeInTheDocument(); // the live elapsed time
   expect(screen.getByLabelText("Generating")).toBeInTheDocument();
 });
 
