@@ -81,6 +81,19 @@ it("signed out, Send asks to sign in and sends nothing", async () => {
   expect(sent).toHaveLength(0);
 });
 
+it("while Clerk is still loading, Send neither sends nor asks a signed-in user to sign in", async () => {
+  vi.mocked(useAuth).mockReturnValue({
+    isSignedIn: undefined,
+    userId: undefined,
+    getToken: () => Promise.resolve(null),
+  } as unknown as ReturnType<typeof useAuth>);
+  renderWithProviders(<Composer />);
+  await userEvent.type(textbox(), "hello{Enter}");
+  expect(clerk.openSignIn).not.toHaveBeenCalled();
+  expect(sent).toHaveLength(0);
+  expect(textbox()).toHaveValue("hello");
+});
+
 it("on failure keeps the draft, shows the error, and a retry reuses the same message id", async () => {
   server.use(
     http.post(`${API}/chats`, async ({ request }) => {

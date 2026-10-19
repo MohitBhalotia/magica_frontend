@@ -17,8 +17,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test",
-    "test:e2e:live": "echo \"not yet (M3)\"",
+    "test:e2e": "playwright test --project=public",
+    "test:e2e:journeys": "playwright test --project=journeys",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -57,6 +57,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
+    "@clerk/testing": "2.2.42",
     "@commitlint/cli": "21.2.3",
     "@commitlint/config-conventional": "21.2.3",
     "@playwright/test": "1.64.1",
