@@ -117,3 +117,46 @@ it("a failed step shows a red ✕ and its safe error", async () => {
   await user.click(screen.getByText("AI Generation"));
   expect(screen.getByRole("alert")).toHaveTextContent("Magica is taking too long.");
 });
+
+it("a stopped turn: 'Stopped after N steps', and the unfinished step shows a grey stop icon", async () => {
+  const user = userEvent.setup();
+  renderWithProviders(
+    <AssistantParts
+      parts={[skill, generate({ state: "input-available", output: undefined })]}
+      status="cancelled"
+    />,
+  );
+
+  await user.click(screen.getByText("Stopped after 2 steps"));
+  expect(screen.getByLabelText("Done")).toBeInTheDocument();
+  expect(screen.getByLabelText("Stopped")).toBeInTheDocument();
+});
+
+it("a failed turn: 'Failed after N steps'", () => {
+  renderWithProviders(<AssistantParts parts={[skill]} status="failed" />);
+  expect(screen.getByText("Failed after 1 step")).toBeInTheDocument();
+});
+
+it("shows links compactly, one per line, never with their signature", async () => {
+  const user = userEvent.setup();
+  const file = (id: string) =>
+    `https://acc.r2.cloudflarestorage.com/magica/uploads/u1/${id}?X-Amz-Credential=AKIA&X-Amz-Signature=abc`;
+  renderWithProviders(
+    <AssistantParts
+      parts={[
+        generate({
+          type: "tool-merge_videos",
+          input: { video_urls: [file("a1"), file("a2")] },
+        }),
+      ]}
+    />,
+  );
+
+  await user.click(screen.getByText("Completed 1 step"));
+  await user.click(screen.getByText("AI Generation"));
+  const value = screen.getByText(/acc\.r2\.cloudflarestorage\.com\/…\/a1/);
+  expect(value.textContent).toBe(
+    "acc.r2.cloudflarestorage.com/…/a1\nacc.r2.cloudflarestorage.com/…/a2",
+  );
+  expect(document.body.textContent).not.toContain("X-Amz");
+});
