@@ -4,9 +4,9 @@ import {
   ChatDetailSchema,
   ChatListSchema,
   ChatSummarySchema,
-  CreateChatResponseSchema,
   SearchResultListSchema,
-  type CreateChatRequest,
+  SendResponseSchema,
+  type SendMessageRequest,
   type UpdateChatRequest,
 } from "@mohitbhalotia/magica-contracts";
 
@@ -28,9 +28,9 @@ export const searchChats = (q: string, token: Token) =>
 export const getChat = (id: string, token: Token) =>
   request(chatPath(id), ChatDetailSchema, { token });
 
-/** Idempotent: resending the same clientMessageId returns the same chat. */
-export const createChat = (body: CreateChatRequest, token: Token) =>
-  request("/api/v1/chats", CreateChatResponseSchema, {
+/** First message: the chat, the message and the run answering it. Idempotent per clientMessageId. */
+export const createChat = (body: SendMessageRequest, token: Token) =>
+  request("/api/v1/chats", SendResponseSchema, {
     method: "POST",
     body: JSON.stringify(body),
     token,

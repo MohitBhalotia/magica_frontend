@@ -15,7 +15,12 @@ const message = (id: string, text: string) => ({
   role: "user" as const,
   status: "success" as const,
   text,
+  contentBlocks: [],
+  metadata: null,
+  errorCode: null,
+  errorMessage: null,
   createdAt: at,
+  completedAt: at,
 });
 const chat: ChatDetail = {
   id: "c1",
@@ -29,6 +34,7 @@ const chat: ChatDetail = {
     items: [message("m2", "second"), message("m1", "first\nline two")],
     nextCursor: null,
   },
+  activeRun: null,
 };
 
 const signIn = (signedIn: boolean) => {

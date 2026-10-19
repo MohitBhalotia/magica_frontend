@@ -4,7 +4,7 @@ import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { beforeEach, expect, it, vi } from "vitest";
 
-import type { CreateChatRequest } from "@mohitbhalotia/magica-contracts";
+import type { SendMessageRequest } from "@mohitbhalotia/magica-contracts";
 
 import { Composer } from "@/features/chat/Composer";
 import { server } from "@/mocks/server";
@@ -23,7 +23,7 @@ const signIn = (signedIn: boolean) => {
 const textbox = () => screen.getByRole("textbox", { name: "Message" });
 const sendButton = () => screen.getByRole("button", { name: "Send message" });
 
-let sent: CreateChatRequest[];
+let sent: SendMessageRequest[];
 beforeEach(() => {
   sent = [];
   sessionStorage.clear();
@@ -31,10 +31,15 @@ beforeEach(() => {
   signIn(true);
   server.use(
     http.post(`${API}/chats`, async ({ request }) => {
-      const body = (await request.json()) as CreateChatRequest;
+      const body = (await request.json()) as SendMessageRequest;
       sent.push(body);
       return HttpResponse.json(
-        { chatId: body.clientMessageId, userMessageId: "m1" },
+        {
+          chatId: body.clientMessageId,
+          userMessageId: "m1",
+          assistantMessageId: "m2",
+          run: { runId: "r1", status: "queued", triggerRunId: null, publicAccessToken: null },
+        },
         { status: 201 },
       );
     }),
@@ -79,7 +84,7 @@ it("signed out, Send asks to sign in and sends nothing", async () => {
 it("on failure keeps the draft, shows the error, and a retry reuses the same message id", async () => {
   server.use(
     http.post(`${API}/chats`, async ({ request }) => {
-      sent.push((await request.json()) as CreateChatRequest);
+      sent.push((await request.json()) as SendMessageRequest);
       return HttpResponse.json(
         {
           error: {

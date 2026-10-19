@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import type {
   ChatList,
   ChatSummary,
-  CreateChatRequest,
+  SendMessageRequest,
   UpdateChatRequest,
 } from "@mohitbhalotia/magica-contracts";
 
@@ -84,7 +84,7 @@ export function useCreateChat() {
   const { userId, getToken } = useAuth();
   const queryKey = chatListKey(userId);
   return useMutation({
-    mutationFn: async (body: CreateChatRequest) => createChat(body, await getToken()),
+    mutationFn: async (body: SendMessageRequest) => createChat(body, await getToken()),
     onMutate: async ({ clientMessageId }) => {
       await queryClient.cancelQueries({ queryKey });
       const previous = queryClient.getQueryData<Pages>(queryKey);
