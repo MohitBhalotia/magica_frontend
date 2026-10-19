@@ -365,6 +365,8 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 | Schema | `wrench` (info-500) | Model schema | — | Model ID · `<id>` (open by default) |
 | Media generation | `sparkles` (icon-primary) + `image`/`video` 12px | AI Generation | — | Model, input media preview (max 384, radius 12), params (first 3 rows + **"View more"** link in info-500), output media |
 
+- **[Observed 2026-10-19]** A crop step is labelled **"Image crop"** (with its credits, `0.005M`), not "AI Generation". Every row shows its duration (`193ms`, `2.2s`), and the group header digit rolls ("Completed 7 steps").
+
 **Step status:**
 
 | State | Look |
@@ -387,15 +389,18 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 - **Multiple assets:** stacked vertically, with an outline pill "⤓ Download all" right-aligned below them (aria-label "Download all N generated assets").
 - **Loading [TBV]:** a skeleton box at the target aspect ratio with a pulse, shown while the step is running.
 
-### 4.8 Files modal [Observed]
-- **Dialog:** centred, 600px wide, max height ~600, radius ~20 **[TBV]**, `shadow-popover`, overlay `rgba(0,0,0,.4)`.
-- **Header:** "All files in this task" (16px/500), then "Select all", "⤓ Download all" and ✕ (ghost buttons).
-- **Filter chips:**
-  - Copy: "All 2", "Documents", "Images 2", "Videos", "Audio", "Code files". The count is shown in `--text-tertiary`.
-  - Selected chip: dark grey fill with white text. Others: `--surface-primary`, radius max, h32.
+### 4.8 Files modal [Observed 2026-10-19, measured]
+- **Opened from** a "View all files in this task" button in the top bar, shown **inside a chat** to the right of the Computer pill (8px gap); the empty state shows only Computer.
+  - Button: `inline-flex rounded-radius-max border-[length:var(--border-width-xs)] border-boarder-tertiary bg-surface-main-background-2 p-space-03 text-icon-primary hover:bg-surface-primary`, tabler `folder-open` 20px (stroke 1.5) → 37.6px circle.
+- **Dialog:** `h-[75vh] w-full max-w-[600px] rounded-2xl` (16px), 1px border, white surface, `shadow-elevation-xl`; mobile `h-[calc(100dvh-1rem)] rounded-xl`.
+- **Header** (`px-5 py-4`, bottom border `--boarder-tertiary`): "All files in this task" (`text-base font-semibold`), then ghost buttons (`rounded-lg px-3 py-1.5 text-sm font-medium text-text-secondary`, hover `bg-surface-secondary`): "Select all", "⤓ Download all" (disabled at 50% when nothing to download), and a 36px ✕ ("Close").
+- **Filter chips** (`rounded-full px-3.5 py-1.5 text-sm`, h32, 8px apart): "All 2", "Documents", "Images 2", "Videos", "Audio", "Code files"; the count is a `ml-1 opacity-60` span, shown only when > 0.
+  - Selected: `bg-surface-overlay-control font-medium text-text-on-action`. Others: `bg-surface-secondary text-text-secondary`, hover `text-text-primary`.
 - **List:**
-  - A day header ("Today", caption) groups the rows.
-  - Row: 40px thumbnail (radius 8), filename (14/20), and meta "PNG · 12:40 PM · 1.1 MB" (caption, `--text-tertiary`).
+  - Day header: the full date, "Saturday, October 17, 2026" (`text-xs font-medium text-text-secondary`).
+  - Row (`group flex items-center gap-3 px-5 py-2.5`, hover `bg-surface-secondary/50`): a checkbox ("Select <name>", visible on hover), a 40px thumbnail (`rounded-lg bg-surface-secondary`, `object-cover`), the filename (`text-sm font-medium`, truncated), the meta "PNG · Sat, Oct 17 · 1.1 MB" (`text-xs text-text-secondary`), and an `ellipsis` button ("Open actions for <name>", 28px, visible on hover).
+  - Row menu: **Preview** (lucide `layout-grid`), **Download** (`download`), **Copy URL** (`file-text`).
+  - Without a filename the reference shows "image file" and meta "IMAGE · Sat, Oct 17".
 - **Loading:** a centred spinner. **Empty:** **[TBV] copy**.
 
 ### 4.9 Popovers & menus [Observed]

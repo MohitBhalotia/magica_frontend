@@ -25,6 +25,7 @@ import {
   deleteChat,
   duplicateChat,
   getChat,
+  listChatAssets,
   listChats,
   retryRun,
   searchChats,
@@ -79,6 +80,18 @@ export function useChat(id: string) {
     queryFn: async () => getChat(id, await getToken()),
     enabled: isSignedIn === true,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 3,
+  });
+}
+
+/** A chat's generated files for the files modal; fetched while the modal is open. */
+export function useChatAssets(chatId: string, enabled: boolean) {
+  const { isSignedIn, userId, getToken } = useAuth();
+  return useInfiniteQuery({
+    queryKey: ["chat-assets", userId, chatId],
+    queryFn: async ({ pageParam }) => listChatAssets(chatId, pageParam, await getToken()),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    enabled: isSignedIn === true && enabled,
   });
 }
 

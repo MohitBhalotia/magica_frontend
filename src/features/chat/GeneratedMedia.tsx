@@ -11,6 +11,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { toolName } from "@/features/chat/ToolSteps";
 import { notAvailable } from "@/features/shell/nav";
+import { downloadFile } from "@/lib/download";
 
 /** DESIGN §4.7: a 384px box, radius 12, letterboxed on the primary surface. */
 const BOX = "relative w-96 overflow-hidden rounded-xl bg-surface-primary";
@@ -61,17 +62,14 @@ function Asset({ asset }: { asset: MediaAsset }) {
         >
           <ImagePlus className="size-4" />
         </button>
-        {/* Magica's CDN is another origin, so the browser opens the file rather than saving it. */}
-        <a
-          href={asset.url}
-          download
-          target="_blank"
-          rel="noreferrer"
+        <button
+          type="button"
           aria-label="Download"
+          onClick={() => void downloadFile(asset.url)}
           className={OVERLAY_BUTTON}
         >
           <Download className="size-4" />
-        </a>
+        </button>
       </div>
     </div>
   );

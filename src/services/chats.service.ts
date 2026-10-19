@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  ChatAssetListSchema,
   ChatDetailSchema,
   ChatListSchema,
   ChatSummarySchema,
@@ -20,6 +21,14 @@ export const listChats = (cursor: string | undefined, token: Token) =>
   request(`/api/v1/chats${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`, ChatListSchema, {
     token,
   });
+
+/** The files modal: a chat's generated files, newest first, 50 per page. */
+export const listChatAssets = (chatId: string, cursor: string | undefined, token: Token) =>
+  request(
+    `${chatPath(chatId)}/assets?limit=50${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`,
+    ChatAssetListSchema,
+    { token },
+  );
 
 /** Titles and message text, case-insensitive substring (DEC-049); first page only in the dialog. */
 export const searchChats = (q: string, token: Token) =>
