@@ -7,6 +7,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 import type { ChatSummary } from "@mohitbhalotia/magica-contracts";
 
 import { TaskList } from "@/features/chats/TaskList";
+import { useChat } from "@/features/chats/useChats";
 import { server } from "@/mocks/server";
 import { API, renderWithProviders } from "@/test/render";
 import { router } from "@/test/router";
@@ -135,6 +136,38 @@ it("renames inline: Enter saves, Escape cancels", async () => {
   expect(screen.getByRole("link", { name: "Red apple" })).toBeInTheDocument();
   await waitFor(() => {
     expect(db.find((c) => c.id === "c2")?.title).toBe("Hello there");
+  });
+});
+
+it("renaming the open chat updates its own title too (the tab title)", async () => {
+  server.use(
+    http.get(`${API}/chats/:id`, ({ params }) =>
+      HttpResponse.json({
+        ...db.find((c) => c.id === params.id),
+        messages: { items: [], nextCursor: null },
+        activeRun: null,
+      }),
+    ),
+  );
+  function OpenChatTitle() {
+    return <p data-testid="open-title">{useChat("c2").data?.title}</p>;
+  }
+  renderWithProviders(
+    <>
+      <TaskList />
+      <OpenChatTitle />
+    </>,
+  );
+  await screen.findByRole("link", { name: "Greeting" });
+  await waitFor(() => {
+    expect(screen.getByTestId("open-title")).toHaveTextContent("Greeting");
+  });
+
+  await openMenu("Greeting");
+  await userEvent.click(screen.getByRole("menuitem", { name: "Rename" }));
+  await userEvent.keyboard("Hello there{Enter}");
+  await waitFor(() => {
+    expect(screen.getByTestId("open-title")).toHaveTextContent("Hello there");
   });
 });
 
