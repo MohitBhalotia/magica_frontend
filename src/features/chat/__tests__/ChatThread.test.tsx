@@ -23,6 +23,7 @@ const message = (id: string, text: string) => ({
   createdAt: at,
   completedAt: at,
   runId: null,
+  attachments: [],
 });
 const chat: ChatDetail = {
   id: "c1",

@@ -79,6 +79,7 @@ it("a reply whose tools spent credits shows the total in its footer", () => {
         createdAt: at,
         completedAt: at,
         runId: "r1",
+        attachments: [],
       }}
     />,
   );

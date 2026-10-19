@@ -5,12 +5,16 @@ import { IconPlug } from "@tabler/icons-react";
 import { ArrowUp, Folder, Loader2, Mic, Paperclip, Square } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import { toast } from "sonner";
 
 import { MAX_MESSAGE_LENGTH, type RunHandle } from "@mohitbhalotia/magica-contracts";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCreateChat, useSendMessage, useStopRun } from "@/features/chats/useChats";
 import { notAvailable } from "@/features/shell/nav";
+import { AttachPopover } from "@/features/uploads/AttachPopover";
+import { AttachmentChips } from "@/features/uploads/AttachmentChips";
+import { useUploads } from "@/features/uploads/useUploads";
 import { cn } from "@/lib/utils";
 import { NEW_CHAT, useComposerStore } from "@/stores/composerStore";
 
@@ -50,6 +54,7 @@ export function Composer({ chatId, activeRun }: { chatId?: string; activeRun?: R
   const mutation = chatId ? reply : createChat;
   const stop = useStopRun(chatId ?? "");
   const textarea = useRef<HTMLTextAreaElement>(null);
+  const uploads = useUploads();
   // Reused until the send succeeds or the text changes, so a retry can't create a second chat.
   const clientMessageId = useRef<string | null>(null);
 
@@ -66,26 +71,34 @@ export function Composer({ chatId, activeRun }: { chatId?: string; activeRun?: R
   }, [text]);
 
   const empty = text.trim() === "";
+  // Files still uploading (or failed) hold the send back; they go with the message once ready.
+  const waitingForFiles = !uploads.ready;
   const send = () => {
     // One reply at a time: Enter waits until the current one is done (the server enforces it too).
-    if (empty || mutation.isPending || activeRun) return;
+    if (empty || waitingForFiles || mutation.isPending || activeRun) return;
     if (!isSignedIn) {
       openSignIn();
       return;
     }
     clientMessageId.current ??= crypto.randomUUID();
     mutation.mutate(
-      { clientMessageId: clientMessageId.current, text: text.trim() },
+      {
+        clientMessageId: clientMessageId.current,
+        text: text.trim(),
+        attachmentIds: uploads.attachmentIds,
+      },
       {
         onSuccess: (sent) => {
           clientMessageId.current = null;
           setDraft(draftKey, "");
+          uploads.clear();
           if (!chatId) router.push(`/chat/${sent.chatId}`);
         },
       },
     );
   };
 
+  const sendHint = empty ? "Add a message first" : "Wait for your files to finish uploading";
   const stopping = activeRun?.status === "stopping" || stop.isPending;
   const stopButton = activeRun && (
     <button
@@ -109,11 +122,11 @@ export function Composer({ chatId, activeRun }: { chatId?: string; activeRun?: R
     <button
       type="button"
       aria-label="Send message"
-      disabled={empty || mutation.isPending}
+      disabled={empty || waitingForFiles || mutation.isPending}
       onClick={send}
       className={cn(
         "flex size-(--magica-composer-action-control) shrink-0 items-center justify-center rounded-radius-max transition-all outline-none focus-visible:ring-2 focus-visible:ring-boarder-action [&_svg]:size-(--magica-icon-size)",
-        empty
+        empty || waitingForFiles
           ? "cursor-not-allowed bg-surface-main-background-2 text-icon-secondary opacity-50"
           : "bg-surface-primary-active text-text-on-action hover:opacity-90",
       )}
@@ -129,6 +142,7 @@ export function Composer({ chatId, activeRun }: { chatId?: string; activeRun?: R
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-radius-xxxxl shadow-[inset_0_0_0_1px_var(--boarder-secondary)] transition-shadow duration-150 group-hover/composer:shadow-[inset_0_0_0_1px_var(--boarder-primary)]"
       />
+      <AttachmentChips chips={uploads.chips} onRemove={uploads.remove} onRetry={uploads.retry} />
       <textarea
         ref={textarea}
         rows={1}
@@ -154,9 +168,18 @@ export function Composer({ chatId, activeRun }: { chatId?: string; activeRun?: R
       />
       <div className="flex items-center justify-between gap-space-02">
         <div className="flex min-w-0 items-center gap-space-02">
-          <Action label="Attach files">
-            <Paperclip />
-          </Action>
+          <AttachPopover
+            trigger={
+              <button type="button" aria-label="Attach files" className={ACTION}>
+                <Paperclip />
+              </button>
+            }
+            onFiles={(files) => {
+              const warning = uploads.add(files);
+              if (warning) toast.error(warning);
+            }}
+            onPick={uploads.addExisting}
+          />
           {/* The reference offers projects only when starting a task, not inside one. */}
           {!chatId && (
             <button
@@ -178,15 +201,15 @@ export function Composer({ chatId, activeRun }: { chatId?: string; activeRun?: R
             <Mic />
           </Action>
           {stopButton ??
-            (empty ? (
+            (empty || waitingForFiles ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   {/* A disabled button gets no pointer events, so the tooltip hangs on a wrapper. */}
-                  <span aria-label="Add a message first" className="inline-flex">
+                  <span aria-label={sendHint} className="inline-flex">
                     {sendButton}
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>Add a message first</TooltipContent>
+                <TooltipContent>{sendHint}</TooltipContent>
               </Tooltip>
             ) : (
               sendButton
