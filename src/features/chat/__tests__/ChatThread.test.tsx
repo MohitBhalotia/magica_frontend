@@ -1,5 +1,5 @@
 import { useAuth } from "@clerk/nextjs";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { beforeEach, expect, it, vi } from "vitest";
@@ -56,7 +56,8 @@ it("shows the messages oldest first", async () => {
   renderWithProviders(<ChatThread id="c1" />);
 
   const log = await screen.findByRole("log", { name: "Chat messages" });
-  expect(log.textContent).toBe("first\nline twosecond");
+  const bubbles = within(log).getAllByText(/first|second/, { selector: "p" });
+  expect(bubbles.map((b) => b.textContent)).toEqual(["first\nline two", "second"]);
   expect(document.title).toBe("Logo | Magica");
 });
 

@@ -157,15 +157,18 @@ export function Composer({ chatId, activeRun }: { chatId?: string; activeRun?: R
           <Action label="Attach files">
             <Paperclip />
           </Action>
-          <button
-            type="button"
-            aria-label="Choose project"
-            onClick={notAvailable}
-            className="flex h-(--magica-composer-action-control) max-w-56 min-w-0 shrink items-center gap-space-02 rounded-radius-max px-space-03 text-small font-medium text-text-secondary transition-colors outline-none hover:bg-surface-main-background-2 focus-visible:ring-2 focus-visible:ring-boarder-action"
-          >
-            <Folder className="size-(--magica-icon-size) shrink-0" />
-            <span className="truncate">Choose project</span>
-          </button>
+          {/* The reference offers projects only when starting a task, not inside one. */}
+          {!chatId && (
+            <button
+              type="button"
+              aria-label="Choose project"
+              onClick={notAvailable}
+              className="flex h-(--magica-composer-action-control) max-w-56 min-w-0 shrink items-center gap-space-02 rounded-radius-max px-space-03 text-small font-medium text-text-secondary transition-colors outline-none hover:bg-surface-main-background-2 focus-visible:ring-2 focus-visible:ring-boarder-action"
+            >
+              <Folder className="size-(--magica-icon-size) shrink-0" />
+              <span className="truncate">Choose project</span>
+            </button>
+          )}
           <Action label="Connect apps">
             <IconPlug className="-rotate-45" />
           </Action>

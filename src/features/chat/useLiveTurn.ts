@@ -6,13 +6,18 @@ import { useRealtimeRun, useRealtimeStream } from "@trigger.dev/react-hooks";
 import { readUIMessageStream, type UIMessage, type UIMessageChunk } from "ai";
 import { useEffect, useState } from "react";
 
-import { UI_STREAM, type MessageMetadata, type RunHandle } from "@mohitbhalotia/magica-contracts";
+import {
+  UI_STREAM,
+  type ChatDetail,
+  type MessageMetadata,
+  type RunHandle,
+} from "@mohitbhalotia/magica-contracts";
 
 import { chatKey, chatListKey } from "@/features/chats/useChats";
 
 export type LiveMessage = UIMessage<MessageMetadata>;
 
-const TITLE_REFRESH_MS = 4000;
+const TITLE_REFRESH_MS = [3_000, 10_000, 25_000];
 
 /** The chunks so far as one message, built by the AI SDK's own reducer. */
 async function fold(chunks: UIMessageChunk[]) {
@@ -55,8 +60,14 @@ export function useLiveTurn(chatId: string, run: RunHandle) {
         void queryClient.invalidateQueries({ queryKey: chatListKey(userId) });
       };
       refresh();
-      // The AI title is written by chat-title 1–3s after the turn; one more refetch picks it up.
-      setTimeout(refresh, TITLE_REFRESH_MS);
+      // A chat's first reply is followed by chat-title, which can take 2–20s on a busy free model:
+      // a few spaced refetches pick the AI title up (bounded, and only while it isn't there yet).
+      const titled = () =>
+        queryClient.getQueryData<ChatDetail>(chatKey(userId, chatId))?.titleSource !== "prompt";
+      for (const delay of TITLE_REFRESH_MS)
+        setTimeout(() => {
+          if (!titled()) refresh();
+        }, delay);
     },
   });
 

@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Check,
-  ChevronDown,
-  CircleAlert,
-  Copy,
-  GitBranch,
-  ThumbsDown,
-  ThumbsUp,
-} from "lucide-react";
+import { Check, ChevronDown, CircleAlert, Copy, GitFork, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -59,7 +51,8 @@ export function AssistantParts({
     );
 
   return (
-    <div className="flex flex-col text-body text-text-primary">
+    // DESIGN §2.3: assistant prose is 16/28 (`text-base leading-7`).
+    <div className="flex flex-col text-base leading-7 text-text-primary">
       {reasoning && (
         <Reasoning
           isStreaming={streaming && blocks.at(-1)?.type === "reasoning"}
@@ -85,39 +78,55 @@ const COPIED_FOR_MS = 2000;
 const clock = (iso: string) =>
   new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 
-/** Under a finished reply (DESIGN §4.5): Copy, Fork, Good, Bad, then the time. */
-function TurnFooter({ message }: { message: Message }) {
+// Measured on the reference (2026-10-19): 28px buttons 2px apart, 14px icons, #585858.
+// `!`: the button's own default icon size would otherwise win.
+const ACTION = "size-7 text-icon-secondary hover:text-icon-primary [&_svg]:size-3.5!";
+
+/** Copy a message's text; the icon turns into a check for a moment. */
+export function CopyAction({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   const copy = () => {
-    void navigator.clipboard.writeText(message.text).then(() => {
+    void navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => {
         setCopied(false);
       }, COPIED_FOR_MS);
     });
   };
-  const action = "size-7 text-icon-secondary hover:text-icon-primary";
   return (
-    <MessageActions>
-      <MessageAction tooltip={copied ? "Copied" : "Copy"} className={action} onClick={copy}>
-        {copied ? <Check /> : <Copy />}
-      </MessageAction>
+    <MessageAction tooltip={copied ? "Copied" : "Copy"} className={ACTION} onClick={copy}>
+      {copied ? <Check /> : <Copy />}
+    </MessageAction>
+  );
+}
+
+/** "12:40 PM" today, "Oct 17" before (DESIGN §6); 12/500 primary like the reference. */
+export function Stamp({ at }: { at: string }) {
+  const date = new Date(at);
+  const today = date.toDateString() === new Date().toDateString();
+  return (
+    <time dateTime={at} className="ml-space-02 text-caption font-medium text-text-primary">
+      {today ? clock(at) : date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+    </time>
+  );
+}
+
+/** Under a finished reply (DESIGN §4.5): Copy, Fork, Good, Bad, then the time. */
+function TurnFooter({ message }: { message: Message }) {
+  return (
+    <MessageActions className="gap-0.5">
+      <CopyAction text={message.text} />
       {/* Out of scope in this build: they explain themselves with a toast (PRD §6.10). */}
-      <MessageAction tooltip="Fork chat" className={action} onClick={notAvailable}>
-        <GitBranch />
+      <MessageAction tooltip="Fork chat" className={ACTION} onClick={notAvailable}>
+        <GitFork />
       </MessageAction>
-      <MessageAction tooltip="Good response" className={action} onClick={notAvailable}>
+      <MessageAction tooltip="Good response" className={ACTION} onClick={notAvailable}>
         <ThumbsUp />
       </MessageAction>
-      <MessageAction tooltip="Bad response" className={action} onClick={notAvailable}>
+      <MessageAction tooltip="Bad response" className={ACTION} onClick={notAvailable}>
         <ThumbsDown />
       </MessageAction>
-      <time
-        dateTime={message.completedAt ?? message.createdAt}
-        className="ml-space-02 text-caption text-text-tertiary"
-      >
-        {clock(message.completedAt ?? message.createdAt)}
-      </time>
+      <Stamp at={message.completedAt ?? message.createdAt} />
     </MessageActions>
   );
 }

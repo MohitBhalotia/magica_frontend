@@ -323,18 +323,20 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 - **User message:**
   - Right-aligned; background `#f4f4f4` (dark `#1f1f20`); radius 16; padding 6×16; max width 448; 14/20; `whitespace-pre-wrap`; `break-words`.
   - Attachments render above the bubble **[TBV]**.
-  - Hover shows the time ("12:39 PM") **[TBV] position**.
+  - **Hover row [Observed 2026-10-19]:** 4px under the bubble, right-aligned: the time (12/500 `--text-primary`), then Copy (28px, 14px icon). It reserves its 28px even when hidden, so the next message starts 24px below it (56px below the bubble).
 - **Assistant message:**
   - No bubble, full column width.
   - Prose 16/28, paragraph margin 16, lists at the same size, `**bold**` at 600–700.
   - Headings, code and tables **[TBV]**. Default: Tailwind Typography with tokens.
-- **Turn footer** (after the final block, once complete):
-  - `◎ 0.22M credits`: caption 12px, `--text-tertiary`, coin icon 12px.
-  - Action row, 28px ghost icons: Copy, Fork chat (out of scope → toast), Good response, Bad response, then the time "12:40 PM" (caption).
+- **Turn footer** (after the final block, once complete) **[Observed 2026-10-19, measured]:**
+  - `◎ 0.05M credits`: 10/12px, `#585858`, coin icon; 12px under the text, 4px above the actions. Shown from M4 (LLM turns are 0 credits).
+  - Action row, gap 2px: 28px ghost buttons with 14px icons in `#585858` (`--icon-secondary`): Copy (lucide `copy`), Fork chat (lucide `git-fork`, out of scope → toast), Good response, Bad response; then, 8px later, the time 12/500 `--text-primary`: "12:40 PM" today, "Oct 17" for older days.
+- **Columns [Observed 2026-10-19]:** messages 868px wide; the in-thread composer is 900px (16px wider on each side) and has **no "Choose project"** (only Attach and Connect apps on the left).
+- **Loading [Observed 2026-10-19]:** a 192×40 user-bubble skeleton, then 7 and 2 grey lines (12px tall, 24px pitch) for the reply.
 - **Spacing:** ~24px between messages; 40px between a user message and the assistant turn **[Observed approx.]**.
 - **Entry animation:** `chat-fade-in-up` at 200ms.
 - **Chat page states [Decision, not observed]:** our reference session expired before we could check these.
-  - Loading: one bubble-shaped skeleton.
+  - Loading: see **Loading** above (observed later).
   - Missing, deleted or someone else's chat (all 404): "Task not found" / "It may have been deleted, or the link is wrong." with a "New task" pill.
   - Other errors: "Couldn't load this task" with the safe API message.
   - Signed out: "Sign in to see this task" with a Sign in pill.
