@@ -58,6 +58,12 @@ Object.assign(Element.prototype, {
   releasePointerCapture: () => undefined,
   scrollIntoView: () => undefined,
 });
+// jsdom has no layout, so every element is 0×0; the virtualized thread would show no rows in a
+// 0px viewport. A typical viewport size instead.
+Object.defineProperties(HTMLElement.prototype, {
+  offsetHeight: { configurable: true, get: () => 800 },
+  offsetWidth: { configurable: true, get: () => 900 },
+});
 // jsdom has no media playback (idea-card previews play on hover).
 Object.assign(HTMLMediaElement.prototype, {
   play: () => Promise.resolve(),

@@ -62,6 +62,29 @@ it("shows the messages oldest first", async () => {
   expect(document.title).toBe("Logo | Magica");
 });
 
+it("a long chat keeps only the rows near the bottom in the DOM", async () => {
+  // jsdom has no layout: give every row a real height so the virtualizer has something to measure.
+  const rect = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+    height: 180,
+    width: 900,
+  } as DOMRect);
+  const items = Array.from({ length: 50 }, (_, i) =>
+    message(`m${String(50 - i)}`, `msg ${String(50 - i)}`),
+  );
+  server.use(
+    http.get(`${API}/chats/c1`, () =>
+      HttpResponse.json({ ...chat, messages: { items, nextCursor: "older" } }),
+    ),
+  );
+  renderWithProviders(<ChatThread id="c1" />);
+
+  const log = await screen.findByRole("log", { name: "Chat messages" });
+  await waitFor(() => {
+    expect(within(log).getAllByText(/^msg /).length).toBeLessThan(20);
+  });
+  rect.mockRestore();
+});
+
 it("a missing or foreign chat shows Task not found with a way out", async () => {
   server.use(
     http.get(`${API}/chats/nope`, () =>

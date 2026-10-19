@@ -35,6 +35,7 @@
     "@streamdown/code": "2.0.0",
     "@tabler/icons-react": "3.49.0",
     "@tanstack/react-query": "5.104.3",
+    "@tanstack/react-virtual": "3.14.13",
     "@trigger.dev/react-hooks": "4.7.4",
     "@uppy/core": "6.2.0",
     "@uppy/transloadit": "6.0.1",

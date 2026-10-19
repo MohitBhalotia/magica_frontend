@@ -2,6 +2,7 @@
 
 import { Show, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
+import { useState } from "react";
 
 import {
   Conversation,
@@ -12,7 +13,8 @@ import { MessageActions } from "@/components/ai-elements/message";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AssistantMessage, CopyAction, LiveTurn, Stamp } from "@/features/chat/AssistantTurn";
 import { Composer } from "@/features/chat/Composer";
-import { useChat } from "@/features/chats/useChats";
+import { ThreadRows } from "@/features/chat/ThreadRows";
+import { useChat, useOlderMessages } from "@/features/chats/useChats";
 import { MessageAttachments } from "@/features/uploads/MessageAttachments";
 import { ApiError } from "@/services/http";
 
@@ -42,6 +44,14 @@ const ACTION_PILL =
  */
 export function ChatThread({ id }: { id: string }) {
   const { data, error, isPending } = useChat(id);
+  // Pages older than the first one, fetched once the reader scrolls near the top (PRD §8.1).
+  const [wantOlder, setWantOlder] = useState(false);
+  const olderPages = useOlderMessages(id, data?.messages.nextCursor ?? null, wantOlder);
+  const older = olderPages.data?.pages.flatMap((page) => page.items) ?? [];
+  const loadOlder = () => {
+    if (!wantOlder) setWantOlder(true);
+    else if (olderPages.hasNextPage && !olderPages.isFetching) void olderPages.fetchNextPage();
+  };
 
   if (error) {
     // Missing, deleted and someone else's chat all answer 404 (never leak existence).
@@ -97,35 +107,40 @@ export function ChatThread({ id }: { id: string }) {
             <title>{`${data.title} | Magica`}</title>
             {/* Follows new content only while the reader is at the bottom (DESIGN §5.1). */}
             <Conversation aria-label="Chat messages" className="min-h-0">
-              <ConversationContent className={`${COLUMN} gap-space-07 py-space-07`}>
-                {[...data.messages.items].reverse().map((m) => (
-                  // Stable wrapper: the fade-in runs once, not again when a live reply is saved.
-                  <div key={m.id} className="animate-chat-fade-in-up">
-                    {m.role === "user" ? (
-                      <div className="group/user flex flex-col items-end gap-1">
-                        <MessageAttachments attachments={m.attachments} />
-                        {/* `user-message` scopes the reference's dark bubble colour (tokens.css). */}
-                        <p className="user-message max-w-md rounded-radius-xxl bg-user-message px-space-05 py-[6px] text-small break-words whitespace-pre-wrap text-text-primary">
-                          {m.text}
-                        </p>
-                        {/* Reference: the time and Copy appear under the bubble on hover. */}
-                        <MessageActions className="gap-0.5 opacity-0 transition-opacity group-hover/user:opacity-100 focus-within:opacity-100">
-                          <Stamp at={m.createdAt} />
-                          <CopyAction text={m.text} />
-                        </MessageActions>
-                      </div>
-                    ) : data.activeRun && (m.status === "streaming" || m.status === "pending") ? (
-                      <LiveTurn chatId={id} run={data.activeRun} />
-                    ) : (
-                      <AssistantMessage
-                        chatId={id}
-                        message={m}
-                        // Newest first from the API: only the latest reply can be retried.
-                        latest={m.id === data.messages.items[0]?.id}
-                      />
-                    )}
-                  </div>
-                ))}
+              <ConversationContent className={`${COLUMN} gap-0 pt-space-07 pb-0`}>
+                <ThreadRows
+                  rows={[...data.messages.items, ...older].reverse()}
+                  rowKey={(m) => m.id}
+                  onNearTop={loadOlder}
+                  renderRow={(m) => (
+                    // Stable wrapper: the fade-in runs once, not again when a live reply is saved.
+                    <div className="animate-chat-fade-in-up">
+                      {m.role === "user" ? (
+                        <div className="group/user flex flex-col items-end gap-1">
+                          <MessageAttachments attachments={m.attachments} />
+                          {/* `user-message` scopes the reference's dark bubble colour (tokens.css). */}
+                          <p className="user-message max-w-md rounded-radius-xxl bg-user-message px-space-05 py-[6px] text-small break-words whitespace-pre-wrap text-text-primary">
+                            {m.text}
+                          </p>
+                          {/* Reference: the time and Copy appear under the bubble on hover. */}
+                          <MessageActions className="gap-0.5 opacity-0 transition-opacity group-hover/user:opacity-100 focus-within:opacity-100">
+                            <Stamp at={m.createdAt} />
+                            <CopyAction text={m.text} />
+                          </MessageActions>
+                        </div>
+                      ) : data.activeRun && (m.status === "streaming" || m.status === "pending") ? (
+                        <LiveTurn chatId={id} run={data.activeRun} />
+                      ) : (
+                        <AssistantMessage
+                          chatId={id}
+                          message={m}
+                          // Newest first from the API: only the latest reply can be retried.
+                          latest={m.id === data.messages.items[0]?.id}
+                        />
+                      )}
+                    </div>
+                  )}
+                />
               </ConversationContent>
               {/* DESIGN §5.1: a 32px white circle with shadow-sm, centred above the composer. */}
               <ConversationScrollButton
