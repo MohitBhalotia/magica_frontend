@@ -10,6 +10,8 @@ import {
   Sparkles,
   Wrench,
   Zap,
+  ListChecks,
+  MessageCircleQuestion,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -75,6 +77,22 @@ const STEPS: Record<ToolName, StepLook> = {
   crop_image: { ...mediaStep("Crop Image"), label: "Image crop" },
   gpt_image_2: mediaStep("GPT Image 2"),
   merge_videos: mediaStep("Merge Videos"),
+  // Not observed on the reference (DESIGN §4.6 [TBV]): our own look for M4b's questions.
+  ask_user: {
+    icon: MessageCircleQuestion,
+    iconClass: "text-icon-information",
+    label: "Question",
+    details: (input) => [
+      ["Question", input.question],
+      ["Options", input.options],
+    ],
+  },
+  propose_plan: {
+    icon: ListChecks,
+    iconClass: "text-icon-information",
+    label: "Plan",
+    details: (input) => [["Plan", input.plan]],
+  },
 };
 
 /** A media card shows this many params before "View more" (DESIGN §4.6). */

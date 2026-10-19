@@ -162,6 +162,7 @@ describe("inside a chat", () => {
       status: "working" as const,
       triggerRunId: "run_1",
       publicAccessToken: "pk",
+      waitpoint: null,
     };
     renderWithProviders(<Composer chatId="c1" activeRun={run} />);
     expect(screen.queryByRole("button", { name: "Send message" })).not.toBeInTheDocument();
@@ -180,7 +181,13 @@ describe("inside a chat", () => {
     renderWithProviders(
       <Composer
         chatId="c1"
-        activeRun={{ runId: "r1", status: "stopping", triggerRunId: "t", publicAccessToken: "p" }}
+        activeRun={{
+          runId: "r1",
+          status: "stopping",
+          triggerRunId: "t",
+          publicAccessToken: "p",
+          waitpoint: null,
+        }}
       />,
     );
     expect(screen.getByRole("button", { name: "Stop" })).toBeDisabled();
