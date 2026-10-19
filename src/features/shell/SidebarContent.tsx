@@ -72,12 +72,19 @@ export function SidebarContent({
 
       <div className="min-h-0 flex-1 overflow-y-auto px-space-03 pt-space-02">
         <ul className="flex flex-col gap-space-02">
-          {NAV_ITEMS.map(({ label, Icon }) => (
+          {NAV_ITEMS.map(({ label, Icon, href }) => (
             <li key={label}>
-              <button type="button" onClick={notAvailable} className={ROW}>
-                <Icon />
-                {label}
-              </button>
+              {href ? (
+                <a href={href} target="_blank" rel="noopener noreferrer" className={ROW}>
+                  <Icon />
+                  {label}
+                </a>
+              ) : (
+                <button type="button" onClick={notAvailable} className={ROW}>
+                  <Icon />
+                  {label}
+                </button>
+              )}
             </li>
           ))}
         </ul>

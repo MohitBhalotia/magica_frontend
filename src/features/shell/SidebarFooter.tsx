@@ -4,6 +4,7 @@ import { Show, SignInButton, UserButton } from "@clerk/nextjs";
 import {
   ArrowRight,
   EllipsisVertical,
+  KeyRound,
   Laptop,
   Moon,
   Settings,
@@ -17,8 +18,10 @@ import { Tabs as TabsPrimitive } from "radix-ui";
 import { useState } from "react";
 
 import { Mascot } from "@/components/Mascot";
+import { ApiKeysDialog } from "@/features/apiKeys/ApiKeysDialog";
 import { notAvailable, ROW } from "@/features/shell/nav";
 import { cn } from "@/lib/utils";
+import { useUiStore } from "@/stores/uiStore";
 
 const THEMES = [
   { value: "system", label: "System theme", Icon: Laptop },
@@ -32,6 +35,7 @@ const OUTLINED =
 /** Footer: "More" expands inline to credits, settings and theme; then the user button (DESIGN §3.2). */
 export function SidebarFooter() {
   const [open, setOpen] = useState(false);
+  const setApiKeysOpen = useUiStore((s) => s.setApiKeysOpen);
 
   return (
     <div className="shrink-0 border-t border-boarder-tertiary px-space-03 pb-space-03">
@@ -127,7 +131,18 @@ export function SidebarFooter() {
               userButtonOuterIdentifier: "text-metadata! font-medium! text-text-primary!",
             },
           }}
-        />
+        >
+          <UserButton.MenuItems>
+            <UserButton.Action
+              label="API keys"
+              labelIcon={<KeyRound className="size-4" />}
+              onClick={() => {
+                setApiKeysOpen(true);
+              }}
+            />
+          </UserButton.MenuItems>
+        </UserButton>
+        <ApiKeysDialog />
       </Show>
       <Show when="signed-out">
         <div className="flex justify-center px-space-04 py-space-02">
