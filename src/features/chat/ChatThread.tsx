@@ -9,6 +9,7 @@ import {
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AssistantParts, LiveTurn } from "@/features/chat/AssistantTurn";
 import { Composer } from "@/features/chat/Composer";
 import { useChat } from "@/features/chats/useChats";
 import { ApiError } from "@/services/http";
@@ -85,10 +86,10 @@ export function ChatThread({ id }: { id: string }) {
                         {m.text}
                       </p>
                     </div>
+                  ) : data.activeRun && (m.status === "streaming" || m.status === "pending") ? (
+                    <LiveTurn key={m.id} chatId={id} run={data.activeRun} />
                   ) : (
-                    <div key={m.id} className="text-body whitespace-pre-wrap text-text-primary">
-                      {m.text}
-                    </div>
+                    <AssistantParts key={m.id} parts={m.contentBlocks} metadata={m.metadata} />
                   ),
                 )}
               </ConversationContent>
