@@ -9,7 +9,7 @@ import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { MAX_MESSAGE_LENGTH } from "@mohitbhalotia/magica-contracts";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useCreateChat } from "@/features/chats/useChats";
+import { useCreateChat, useSendMessage } from "@/features/chats/useChats";
 import { notAvailable } from "@/features/shell/nav";
 import { cn } from "@/lib/utils";
 import { NEW_CHAT, useComposerStore } from "@/stores/composerStore";
@@ -33,16 +33,20 @@ function Action({ label, children }: { label: string; children: ReactNode }) {
 }
 
 /**
- * The empty-state composer (DESIGN §4.2, observed 2026-10-18). Enter sends, Shift+Enter adds a
- * line. Send creates the chat with its first message, then opens it; signed out, it asks to sign in.
+ * The composer (DESIGN §4.2, observed 2026-10-18). Enter sends, Shift+Enter adds a line; signed
+ * out, it asks to sign in. Without `chatId` (empty state) Send creates the chat with its first
+ * message and opens it; inside a chat it sends a follow-up.
  */
-export function Composer() {
+export function Composer({ chatId }: { chatId?: string }) {
   const router = useRouter();
   const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
-  const text = useComposerStore((s) => s.drafts[NEW_CHAT] ?? "");
+  const draftKey = chatId ?? NEW_CHAT;
+  const text = useComposerStore((s) => s.drafts[draftKey] ?? "");
   const setDraft = useComposerStore((s) => s.setDraft);
-  const create = useCreateChat();
+  const createChat = useCreateChat();
+  const reply = useSendMessage(chatId ?? "");
+  const mutation = chatId ? reply : createChat;
   const textarea = useRef<HTMLTextAreaElement>(null);
   // Reused until the send succeeds or the text changes, so a retry can't create a second chat.
   const clientMessageId = useRef<string | null>(null);
@@ -61,19 +65,19 @@ export function Composer() {
 
   const empty = text.trim() === "";
   const send = () => {
-    if (empty || create.isPending) return;
+    if (empty || mutation.isPending) return;
     if (!isSignedIn) {
       openSignIn();
       return;
     }
     clientMessageId.current ??= crypto.randomUUID();
-    create.mutate(
+    mutation.mutate(
       { clientMessageId: clientMessageId.current, text: text.trim() },
       {
-        onSuccess: ({ chatId }) => {
+        onSuccess: (sent) => {
           clientMessageId.current = null;
-          setDraft(NEW_CHAT, "");
-          router.push(`/chat/${chatId}`);
+          setDraft(draftKey, "");
+          if (!chatId) router.push(`/chat/${sent.chatId}`);
         },
       },
     );
@@ -83,7 +87,7 @@ export function Composer() {
     <button
       type="button"
       aria-label="Send message"
-      disabled={empty || create.isPending}
+      disabled={empty || mutation.isPending}
       onClick={send}
       className={cn(
         "flex size-(--magica-composer-action-control) shrink-0 items-center justify-center rounded-radius-max transition-all outline-none focus-visible:ring-2 focus-visible:ring-boarder-action [&_svg]:size-(--magica-icon-size)",
@@ -92,7 +96,7 @@ export function Composer() {
           : "bg-surface-primary-active text-text-on-action hover:opacity-90",
       )}
     >
-      {create.isPending ? <Loader2 className="animate-spin" /> : <ArrowUp />}
+      {mutation.isPending ? <Loader2 className="animate-spin" /> : <ArrowUp />}
     </button>
   );
 
@@ -107,15 +111,15 @@ export function Composer() {
         ref={textarea}
         rows={1}
         aria-label="Message"
-        placeholder="Assign a task or ask anything..."
+        placeholder={chatId ? "Send a message..." : "Assign a task or ask anything..."}
         maxLength={MAX_MESSAGE_LENGTH}
         value={text}
-        // The empty state exists to take a prompt; the reference focuses it too.
+        // The composer is the page's main input; the reference focuses it too.
         // eslint-disable-next-line jsx-a11y/no-autofocus
         autoFocus
         onChange={(e) => {
           clientMessageId.current = null;
-          setDraft(NEW_CHAT, e.target.value);
+          setDraft(draftKey, e.target.value);
         }}
         onKeyDown={(e) => {
           // Enter while an IME is composing confirms the candidate; it must not send.

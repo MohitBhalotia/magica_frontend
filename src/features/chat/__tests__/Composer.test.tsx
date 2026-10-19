@@ -2,7 +2,7 @@ import { useAuth } from "@clerk/nextjs";
 import { screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { beforeEach, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { SendMessageRequest } from "@mohitbhalotia/magica-contracts";
 
@@ -108,6 +108,65 @@ it("on failure keeps the draft, shows the error, and a retry reuses the same mes
   });
   expect(sent[1]?.clientMessageId).toBe(sent[0]?.clientMessageId);
   expect(router.push).not.toHaveBeenCalled();
+});
+
+describe("inside a chat", () => {
+  const replied = (body: SendMessageRequest) =>
+    HttpResponse.json(
+      {
+        chatId: "c1",
+        userMessageId: body.clientMessageId,
+        assistantMessageId: "m9",
+        run: { runId: "r2", status: "queued", triggerRunId: null, publicAccessToken: null },
+      },
+      { status: 201 },
+    );
+
+  it("sends a follow-up to the chat, stays on the page and clears only this chat's draft", async () => {
+    useComposerStore.setState({ drafts: { [NEW_CHAT]: "other draft" } });
+    server.use(
+      http.post(`${API}/chats/c1/messages`, async ({ request }) => {
+        const body = (await request.json()) as SendMessageRequest;
+        sent.push(body);
+        return replied(body);
+      }),
+    );
+    renderWithProviders(<Composer chatId="c1" />);
+    expect(textbox()).toHaveAttribute("placeholder", "Send a message...");
+
+    await userEvent.type(textbox(), "and a dark version{Enter}");
+
+    await waitFor(() => {
+      expect(textbox()).toHaveValue("");
+    });
+    expect(sent.map((b) => b.text)).toEqual(["and a dark version"]);
+    expect(router.push).not.toHaveBeenCalled();
+    expect(useComposerStore.getState().drafts).toEqual({ [NEW_CHAT]: "other draft" });
+  });
+
+  it("a reply still in progress shows the API's message and keeps the draft", async () => {
+    server.use(
+      http.post(`${API}/chats/c1/messages`, () =>
+        HttpResponse.json(
+          {
+            error: {
+              code: "RUN_ACTIVE",
+              message: "A reply is already in progress in this chat.",
+              traceId: "t",
+            },
+          },
+          { status: 409 },
+        ),
+      ),
+    );
+    renderWithProviders(<Composer chatId="c1" />);
+    await userEvent.type(textbox(), "too soon{Enter}");
+
+    expect(
+      await screen.findByText("A reply is already in progress in this chat."),
+    ).toBeInTheDocument();
+    expect(textbox()).toHaveValue("too soon");
+  });
 });
 
 it("keeps the draft in sessionStorage across reloads", async () => {

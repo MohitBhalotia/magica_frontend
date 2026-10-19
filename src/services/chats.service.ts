@@ -36,6 +36,14 @@ export const createChat = (body: SendMessageRequest, token: Token) =>
     token,
   });
 
+/** A follow-up in an existing chat. 409 RUN_ACTIVE while a reply is still being written. */
+export const sendMessage = (chatId: string, body: SendMessageRequest, token: Token) =>
+  request(`${chatPath(chatId)}/messages`, SendResponseSchema, {
+    method: "POST",
+    body: JSON.stringify(body),
+    token,
+  });
+
 export const updateChat = (id: string, patch: UpdateChatRequest, token: Token) =>
   request(chatPath(id), ChatSummarySchema, { method: "PATCH", body: JSON.stringify(patch), token });
 

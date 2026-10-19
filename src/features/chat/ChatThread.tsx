@@ -3,7 +3,13 @@
 import { Show, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Composer } from "@/features/chat/Composer";
 import { useChat } from "@/features/chats/useChats";
 import { ApiError } from "@/services/http";
 
@@ -23,8 +29,8 @@ const ACTION_PILL =
   "inline-flex h-8 items-center rounded-radius-max bg-text-primary px-space-04 text-small font-medium text-surface-main-background shadow-sm transition-opacity hover:opacity-90";
 
 /**
- * `/chat/<id>` in M1: the user messages (DESIGN §4.5). Streaming turns, the assistant's blocks and
- * the composer here arrive with runs in M2.
+ * `/chat/<id>`: the thread (DESIGN §4.5) above the follow-up composer. The live turn and the
+ * assistant's blocks render here from M2 F3.
  */
 export function ChatThread({ id }: { id: string }) {
   const { data, error, isPending } = useChat(id);
@@ -66,29 +72,32 @@ export function ChatThread({ id }: { id: string }) {
           </div>
         ) : (
           // The API pages newest first; the thread reads oldest first.
-          <>
+          <div className="flex h-full flex-col">
             {/* React 19 hoists <title> into <head>: the tab shows the chat (DESIGN §5.2). */}
             <title>{`${data.title} | Magica`}</title>
-            <ol
-              role="log"
-              aria-label="Chat messages"
-              className={`${COLUMN} flex flex-col gap-space-07 py-space-07`}
-            >
-              {[...data.messages.items].reverse().map((m) =>
-                m.role === "user" ? (
-                  <li key={m.id} className="flex justify-end">
-                    <p className="max-w-md rounded-radius-xxl bg-user-message px-space-05 py-[6px] text-small break-words whitespace-pre-wrap text-text-primary">
+            {/* Follows new content only while the reader is at the bottom (DESIGN §5.1). */}
+            <Conversation aria-label="Chat messages" className="min-h-0">
+              <ConversationContent className={`${COLUMN} gap-space-07 py-space-07`}>
+                {[...data.messages.items].reverse().map((m) =>
+                  m.role === "user" ? (
+                    <div key={m.id} className="flex justify-end">
+                      <p className="max-w-md rounded-radius-xxl bg-user-message px-space-05 py-[6px] text-small break-words whitespace-pre-wrap text-text-primary">
+                        {m.text}
+                      </p>
+                    </div>
+                  ) : (
+                    <div key={m.id} className="text-body whitespace-pre-wrap text-text-primary">
                       {m.text}
-                    </p>
-                  </li>
-                ) : (
-                  <li key={m.id} className="text-body whitespace-pre-wrap text-text-primary">
-                    {m.text}
-                  </li>
-                ),
-              )}
-            </ol>
-          </>
+                    </div>
+                  ),
+                )}
+              </ConversationContent>
+              <ConversationScrollButton />
+            </Conversation>
+            <div className={`${COLUMN} pb-space-05`}>
+              <Composer chatId={id} />
+            </div>
+          </div>
         )}
       </Show>
     </>

@@ -24,6 +24,7 @@ import {
   getChat,
   listChats,
   searchChats,
+  sendMessage,
   updateChat,
 } from "@/services/chats.service";
 import { ApiError } from "@/services/http";
@@ -63,11 +64,14 @@ export function useChatSearch(q: string) {
   });
 }
 
+export const chatKey = (userId: string | null | undefined, id: string) =>
+  ["chat", userId, id] as const;
+
 /** One chat with its newest messages. A 404 is final, so it isn't retried. */
 export function useChat(id: string) {
   const { isSignedIn, userId, getToken } = useAuth();
   return useQuery({
-    queryKey: ["chat", userId, id],
+    queryKey: chatKey(userId, id),
     queryFn: async () => getChat(id, await getToken()),
     enabled: isSignedIn === true,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 3,
@@ -114,6 +118,24 @@ export function useCreateChat() {
       showError(error);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+}
+
+/**
+ * A follow-up message. Not optimistic: the refetched chat brings the stored message, the reply's
+ * placeholder and the run to follow live (`activeRun`). A reply in progress → RUN_ACTIVE toast.
+ */
+export function useSendMessage(chatId: string) {
+  const queryClient = useQueryClient();
+  const { userId, getToken } = useAuth();
+  return useMutation({
+    mutationFn: async (body: SendMessageRequest) => sendMessage(chatId, body, await getToken()),
+    onError: showError,
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: chatKey(userId, chatId) }),
+        queryClient.invalidateQueries({ queryKey: chatListKey(userId) }),
+      ]),
   });
 }
 
