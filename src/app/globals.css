@@ -193,6 +193,15 @@
   --spacing-space-16: var(--space-16);
   /* shadow-xs..xl come from the reference :root directly (same names as Tailwind's) */
   --shadow-popover: var(--shadow-xl);
+
+  /* DESIGN §2.8: a new message or block entering the thread. */
+  --animate-chat-fade-in-up: chat-fade-in-up 200ms ease-out both;
+  @keyframes chat-fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
 }
 
 @layer base {

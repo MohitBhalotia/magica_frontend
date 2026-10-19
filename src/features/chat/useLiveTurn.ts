@@ -12,6 +12,8 @@ import { chatKey, chatListKey } from "@/features/chats/useChats";
 
 export type LiveMessage = UIMessage<MessageMetadata>;
 
+const TITLE_REFRESH_MS = 4000;
+
 /** The chunks so far as one message, built by the AI SDK's own reducer. */
 async function fold(chunks: UIMessageChunk[]) {
   const stream = new ReadableStream<UIMessageChunk>({
@@ -48,8 +50,13 @@ export function useLiveTurn(chatId: string, run: RunHandle) {
     ...options,
     // The stream itself stays open ~60s after the run ends, so the run's status marks the end.
     onComplete: () => {
-      void queryClient.invalidateQueries({ queryKey: chatKey(userId, chatId) });
-      void queryClient.invalidateQueries({ queryKey: chatListKey(userId) });
+      const refresh = () => {
+        void queryClient.invalidateQueries({ queryKey: chatKey(userId, chatId) });
+        void queryClient.invalidateQueries({ queryKey: chatListKey(userId) });
+      };
+      refresh();
+      // The AI title is written by chat-title 1–3s after the turn; one more refetch picks it up.
+      setTimeout(refresh, TITLE_REFRESH_MS);
     },
   });
 

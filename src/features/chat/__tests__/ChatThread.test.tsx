@@ -1,5 +1,6 @@
 import { useAuth } from "@clerk/nextjs";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { beforeEach, expect, it, vi } from "vitest";
 
@@ -72,6 +73,46 @@ it("a missing or foreign chat shows Task not found with a way out", async () => 
 
   expect(await screen.findByRole("heading", { name: "Task not found" })).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "New task" })).toHaveAttribute("href", "/chat");
+});
+
+it("a follow-up shows at once, and goes away again if the server says no", async () => {
+  let refuse: () => void = () => undefined;
+  server.use(
+    http.get(`${API}/chats/c1`, () => HttpResponse.json(chat)),
+    http.post(
+      `${API}/chats/c1/messages`,
+      () =>
+        new Promise<Response>((resolve) => {
+          refuse = () => {
+            resolve(
+              HttpResponse.json(
+                {
+                  error: {
+                    code: "RUN_ACTIVE",
+                    message: "A reply is already in progress in this chat.",
+                    traceId: "t",
+                  },
+                },
+                { status: 409 },
+              ),
+            );
+          };
+        }),
+    ),
+  );
+  renderWithProviders(<ChatThread id="c1" />);
+  const log = await screen.findByRole("log", { name: "Chat messages" });
+
+  await userEvent.type(screen.getByRole("textbox", { name: "Message" }), "one more{Enter}");
+  await waitFor(() => {
+    expect(log).toHaveTextContent("one more");
+  });
+
+  refuse();
+  expect(
+    await screen.findByText("A reply is already in progress in this chat."),
+  ).toBeInTheDocument();
+  expect(log).not.toHaveTextContent("one more");
 });
 
 it("signed out, asks to sign in instead of fetching", () => {

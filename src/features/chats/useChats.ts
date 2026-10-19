@@ -14,6 +14,7 @@ import type {
   ChatDetail,
   ChatList,
   ChatSummary,
+  Message,
   SendMessageRequest,
   UpdateChatRequest,
 } from "@mohitbhalotia/magica-contracts";
@@ -125,18 +126,48 @@ export function useCreateChat() {
 }
 
 /**
- * A follow-up message. Not optimistic: the refetched chat brings the stored message, the reply's
- * placeholder and the run to follow live (`activeRun`). A reply in progress → RUN_ACTIVE toast.
+ * A follow-up message. The user's bubble shows at once and is removed again if the server says
+ * no (e.g. RUN_ACTIVE, with a toast); the refetched chat then brings the stored message, the
+ * reply's placeholder and the run to follow live (`activeRun`).
  */
 export function useSendMessage(chatId: string) {
   const queryClient = useQueryClient();
   const { userId, getToken } = useAuth();
+  const queryKey = chatKey(userId, chatId);
   return useMutation({
     mutationFn: async (body: SendMessageRequest) => sendMessage(chatId, body, await getToken()),
-    onError: showError,
+    onMutate: async ({ clientMessageId, text }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<ChatDetail>(queryKey);
+      const now = new Date().toISOString();
+      const bubble: Message = {
+        id: clientMessageId,
+        role: "user",
+        status: "success",
+        text,
+        contentBlocks: [],
+        metadata: null,
+        errorCode: null,
+        errorMessage: null,
+        createdAt: now,
+        completedAt: now,
+        runId: null,
+      };
+      // Newest first, as the API pages them.
+      queryClient.setQueryData<ChatDetail>(queryKey, (old) =>
+        old
+          ? { ...old, messages: { ...old.messages, items: [bubble, ...old.messages.items] } }
+          : old,
+      );
+      return { previous };
+    },
+    onError: (error, _body, context) => {
+      queryClient.setQueryData(queryKey, context?.previous);
+      showError(error);
+    },
     onSettled: () =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: chatKey(userId, chatId) }),
+        queryClient.invalidateQueries({ queryKey }),
         queryClient.invalidateQueries({ queryKey: chatListKey(userId) }),
       ]),
   });

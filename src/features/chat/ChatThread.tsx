@@ -79,27 +79,33 @@ export function ChatThread({ id }: { id: string }) {
             {/* Follows new content only while the reader is at the bottom (DESIGN §5.1). */}
             <Conversation aria-label="Chat messages" className="min-h-0">
               <ConversationContent className={`${COLUMN} gap-space-07 py-space-07`}>
-                {[...data.messages.items].reverse().map((m) =>
-                  m.role === "user" ? (
-                    <div key={m.id} className="flex justify-end">
-                      <p className="max-w-md rounded-radius-xxl bg-user-message px-space-05 py-[6px] text-small break-words whitespace-pre-wrap text-text-primary">
-                        {m.text}
-                      </p>
-                    </div>
-                  ) : data.activeRun && (m.status === "streaming" || m.status === "pending") ? (
-                    <LiveTurn key={m.id} chatId={id} run={data.activeRun} />
-                  ) : (
-                    <AssistantMessage
-                      key={m.id}
-                      chatId={id}
-                      message={m}
-                      // Newest first from the API: only the latest reply can be retried.
-                      latest={m.id === data.messages.items[0]?.id}
-                    />
-                  ),
-                )}
+                {[...data.messages.items].reverse().map((m) => (
+                  // Stable wrapper: the fade-in runs once, not again when a live reply is saved.
+                  <div key={m.id} className="animate-chat-fade-in-up">
+                    {m.role === "user" ? (
+                      <div className="flex justify-end">
+                        <p className="max-w-md rounded-radius-xxl bg-user-message px-space-05 py-[6px] text-small break-words whitespace-pre-wrap text-text-primary">
+                          {m.text}
+                        </p>
+                      </div>
+                    ) : data.activeRun && (m.status === "streaming" || m.status === "pending") ? (
+                      <LiveTurn chatId={id} run={data.activeRun} />
+                    ) : (
+                      <AssistantMessage
+                        chatId={id}
+                        message={m}
+                        // Newest first from the API: only the latest reply can be retried.
+                        latest={m.id === data.messages.items[0]?.id}
+                      />
+                    )}
+                  </div>
+                ))}
               </ConversationContent>
-              <ConversationScrollButton />
+              {/* DESIGN §5.1: a 32px white circle with shadow-sm, centred above the composer. */}
+              <ConversationScrollButton
+                variant="ghost"
+                className="size-8 bg-surface-main-background text-icon-primary shadow-sm hover:bg-surface-main-background-2 dark:bg-surface-main-background-3 dark:hover:bg-surface-main-background-2"
+              />
             </Conversation>
             <div className={`${COLUMN} pb-space-05`}>
               <Composer chatId={id} activeRun={data.activeRun} />
