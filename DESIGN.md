@@ -347,7 +347,7 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 - Running: `Working · <N> steps` (the digit rolls when N changes; "step" is singular for 1).
 - Done: `Completed <N> steps`. The group **auto-collapses** when it completes.
 - Waiting: **[TBV]** e.g. `Waiting for you`.
-- Failed or stopped: **[TBV]** e.g. `Failed after N steps`, `Stopped`.
+- Failed or stopped: **[TBV]** ours reads `Failed after N steps` / `Stopped after N steps` (from the saved message's status), collapsed like a finished group.
 
 **Before the first step:** the row reads `⌄ Thinking` with a shimmer. It turns into the group header once the first tool call arrives. Thinking duration is stored in metadata (`thinkingDurationSeconds`).
 
@@ -366,6 +366,7 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 | Media generation | `sparkles` (icon-primary) + `image`/`video` 12px | AI Generation | — | Model, input media preview (max 384, radius 12), params (first 3 rows + **"View more"** link in info-500), output media |
 
 - **[Observed 2026-10-19]** A crop step is labelled **"Image crop"** (with its credits, `0.005M`), not "AI Generation". Rows show their duration (`193ms`, `2.2s`) after the status icon (lucide `clock` 10px, `text-text-secondary/40 text-caption tabular-nums`); billed rows (AI Generation, Image crop) show their credits instead, with no duration. The group header digit rolls ("Completed 7 steps").
+- **[Decision]** Detail values: links show as `host/…/file` (never their query string or signature), lists one item per line, and long unbroken values wrap (`minmax(0,1fr)` + `wrap-anywhere`) so the card never widens the page.
 - **"View more" [TBV]:** the only reference media card seen (2 rows) has no "View more", so whether it turns into "View less" is unverified; ours expands and the link goes away.
 
 **Step status:**
@@ -375,7 +376,7 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 | running | spinner in the status slot, live elapsed time |
 | completed | lucide `circle-check`, success-500 |
 | failed | red ✕ circle; the card shows the safe error and code **[TBV] exact look** |
-| cancelled | grey, no check **[TBV]** |
+| cancelled (left unfinished by Stop) | lucide `circle-minus` 12px, `text-icon-secondary`, `aria-label="Stopped"` **[TBV]** |
 | waiting (approval) | **[TBV]** |
 
 - Duration: `<1s` → `193ms`, otherwise one decimal (`2.2s`, `25.5s`), in mono `tabular-nums`.
@@ -448,6 +449,8 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 - An inline card anchored **above the composer** within the 900 column. Radius 16, 1px `--boarder-tertiary`, `shadow-md`, padding 16.
 - Contents: a title, a body specific to the waitpoint type, then actions (primary "Approve"/"Continue", secondary "Cancel"), and an expiry countdown in caption text.
 - Focus moves to it when it appears, and it is announced via `aria-live`.
+- Its answer buttons stay disabled for the first 600ms, so a click or Enter already in flight as it appears can't answer it.
+- The countdown is capped at 15:00 (the waitpoint TTL), so a browser clock behind the server's never shows more.
 - Expired state: "This request expired. Reply to continue." and the card dims.
 - Renderers by type: `options` (radio list), `plan_approval` (Markdown plan), `credit_approval` ("This will use ~0.27M credits"), `media_approval`.
 

@@ -3,6 +3,7 @@
 import {
   ChevronDown,
   CircleCheck,
+  CircleMinus,
   CircleX,
   Clock,
   LoaderCircle,
@@ -18,6 +19,7 @@ import { useEffect, useState } from "react";
 
 import {
   MediaToolOutputSchema,
+  type Message,
   type ToolBlock,
   type ToolName,
 } from "@mohitbhalotia/magica-contracts";
@@ -100,7 +102,19 @@ const PARAMS_SHOWN = 3;
 
 /** Microcredits as the reference shows them: `0.005M`, up to 3 decimals (DESIGN §6). */
 const credits = (micro: number) => `${String(Number((micro / 1_000_000).toFixed(3)))}M`;
-const show = (value: unknown) => (typeof value === "string" ? value : JSON.stringify(value));
+/** A link as `host/…/file`: signed links are long, and their signature isn't for display. */
+const compactLinks = (text: string) =>
+  text.replace(/https?:\/\/[^\s"]+/g, (link) => {
+    if (!URL.canParse(link)) return link;
+    const { host, pathname } = new URL(link);
+    const segments = pathname.split("/").filter(Boolean);
+    return segments.length > 1 ? `${host}/…/${segments.at(-1) ?? ""}` : host + pathname;
+  });
+/** A detail value as text; a list (e.g. `video_urls`) shows one item per line. */
+const show = (value: unknown): string =>
+  Array.isArray(value)
+    ? value.map(show).join("\n")
+    : compactLinks(typeof value === "string" ? value : JSON.stringify(value));
 
 /** A step's duration as the reference shows it: `193ms`, `2.2s`, `1m 05s` (DESIGN §4.6). */
 export function duration(ms: number) {
@@ -114,15 +128,19 @@ export const toolName = (block: ToolBlock) => block.type.slice("tool-".length) a
 
 /**
  * The turn's tool calls as one collapsible group: "Working · N steps" while the turn runs, then
- * "Completed N steps", collapsed (DESIGN §4.6). A saved turn mounts fresh, so it starts collapsed.
+ * "Completed N steps" (or "Stopped/Failed after N steps"), collapsed (DESIGN §4.6). A saved turn
+ * mounts fresh, so it starts collapsed.
  */
 export function ToolSteps({
   steps,
   streaming,
+  status,
   toolMs = {},
 }: {
   steps: ToolBlock[];
   streaming: boolean;
+  /** The saved message's status; absent while live. */
+  status?: Message["status"];
   /** Each finished call's duration by `toolCallId` (message metadata). */
   toolMs?: Record<string, number>;
 }) {
@@ -131,7 +149,13 @@ export function ToolSteps({
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="mb-space-04">
       <CollapsibleTrigger className="flex items-center gap-space-02 text-small text-text-secondary hover:text-text-primary">
-        {streaming ? `Working · ${count}` : `Completed ${count}`}
+        {streaming
+          ? `Working · ${count}`
+          : status === "cancelled"
+            ? `Stopped after ${count}`
+            : status === "failed"
+              ? `Failed after ${count}`
+              : `Completed ${count}`}
         <ChevronDown className={cn("size-3 transition-transform", open && "rotate-180")} />
       </CollapsibleTrigger>
       <CollapsibleContent className="mt-space-02 flex flex-col">
@@ -192,11 +216,14 @@ function StepRow({
         />
       </CollapsibleTrigger>
       <CollapsibleContent className="mb-space-02 ml-7 rounded-lg border border-boarder-tertiary p-space-03 text-[13px]">
-        <dl className="grid grid-cols-[88px_1fr] gap-x-space-03 gap-y-space-02">
+        {/* minmax(0,…) and wrap-anywhere: a long unbroken value wraps instead of widening the page. */}
+        <dl className="grid grid-cols-[88px_minmax(0,1fr)] gap-x-space-03 gap-y-space-02">
           {shown.map(([key, value]) => (
             <div key={key} className="contents">
               <dt className="text-text-secondary">{key}</dt>
-              <dd className="break-words text-text-primary">{show(value)}</dd>
+              <dd className="min-w-0 wrap-anywhere whitespace-pre-line text-text-primary">
+                {show(value)}
+              </dd>
             </div>
           ))}
         </dl>
@@ -245,12 +272,13 @@ function Elapsed() {
   return <Duration ms={now - startedAt} />;
 }
 
-/** Running: spinner. Done: green check. Failed: red ✕. Left unfinished by Stop: nothing. */
+/** Running: spinner. Done: green check. Failed: red ✕. Left unfinished by Stop: grey minus. */
 function StepStatus({ state, streaming }: { state: ToolBlock["state"]; streaming: boolean }) {
   if (state === "output-available")
     return <CircleCheck aria-label="Done" className="size-3 text-icon-success" />;
   if (state === "output-error")
     return <CircleX aria-label="Failed" className="size-3 text-icon-error" />;
-  if (!streaming) return null;
+  if (!streaming)
+    return <CircleMinus aria-label="Stopped" className="size-3 text-icon-secondary" />;
   return <LoaderCircle aria-label="Running" className="size-3 animate-spin text-icon-secondary" />;
 }

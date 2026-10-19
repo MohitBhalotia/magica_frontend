@@ -38,10 +38,12 @@ export function AssistantParts({
   parts,
   metadata,
   streaming = false,
+  status,
 }: {
   parts: readonly unknown[];
   metadata?: unknown;
   streaming?: boolean;
+  status?: Message["status"];
 }) {
   const blocks = toBlocks(parts);
   const reasoning = blocks.flatMap((b) => (b.type === "reasoning" ? [b.text] : [])).join("\n\n");
@@ -69,7 +71,9 @@ export function AssistantParts({
           <ReasoningContent>{reasoning}</ReasoningContent>
         </Reasoning>
       )}
-      {steps.length > 0 && <ToolSteps steps={steps} streaming={streaming} toolMs={toolMs} />}
+      {steps.length > 0 && (
+        <ToolSteps steps={steps} streaming={streaming} status={status} toolMs={toolMs} />
+      )}
       {blocks.map((b, i) =>
         b.type === "text" ? (
           // Parts only ever append, so the index is a stable key.
@@ -174,7 +178,11 @@ export function AssistantMessage({
   const ended = message.status === "failed" || message.status === "cancelled";
   return (
     <div className="flex flex-col gap-space-03">
-      <AssistantParts parts={message.contentBlocks} metadata={message.metadata} />
+      <AssistantParts
+        parts={message.contentBlocks}
+        metadata={message.metadata}
+        status={message.status}
+      />
       {message.status === "failed" && (
         <p role="alert" className="flex items-center gap-space-02 text-caption text-text-error">
           <CircleAlert className="size-3 shrink-0" />
