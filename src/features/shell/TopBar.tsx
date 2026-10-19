@@ -3,16 +3,20 @@
 import { Show, SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
 import { IconLayoutSidebar, IconSparkles2 } from "@tabler/icons-react";
 import { Monitor } from "lucide-react";
+import { useParams } from "next/navigation";
 
+import { FilesButton } from "@/features/chat/FilesModal";
 import { ModelSelector } from "@/features/shell/ModelSelector";
 import { notAvailable } from "@/features/shell/nav";
 import { cn } from "@/lib/utils";
 import { useUiStore } from "@/stores/uiStore";
 
-/** Top bar (DESIGN §3.3, observed 2026-10-18): model selector left; Computer + credits right. */
+/** Top bar (DESIGN §3.3): model selector left; Computer, files (in a chat) and credits right. */
 export function TopBar() {
   const setDrawerOpen = useUiStore((s) => s.setDrawerOpen);
   const { isSignedIn } = useAuth();
+  // Inside a chat the reference adds "View all files in this task" after Computer (DESIGN §4.8).
+  const { chatId } = useParams<{ chatId?: string }>();
 
   return (
     <header
@@ -45,6 +49,7 @@ export function TopBar() {
             <Monitor className="size-4" />
             <span className="hidden sm:inline">Computer</span>
           </button>
+          {chatId && <FilesButton chatId={chatId} />}
           {/* The balance and the plan popover arrive with credits (M4). */}
           <button
             type="button"
