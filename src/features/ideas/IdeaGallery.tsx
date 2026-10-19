@@ -70,12 +70,13 @@ export function IdeaGallery() {
   const ideas = tab === ALL ? IDEAS : IDEAS.filter((i) => (i.categories as string[]).includes(tab));
 
   return (
-    <div className="flex w-full flex-col gap-space-08">
-      <TabsPrimitive.Root
-        value={tab}
-        onValueChange={setTab}
-        className="w-full [scrollbar-width:none] overflow-x-auto"
-      >
+    // The cards are the active tab's panel, so each tab controls something real (axe, step 5).
+    <TabsPrimitive.Root
+      value={tab}
+      onValueChange={setTab}
+      className="flex w-full flex-col gap-space-08"
+    >
+      <div className="w-full [scrollbar-width:none] overflow-x-auto">
         <TabsPrimitive.List
           aria-label="Explore ideas"
           className="flex min-h-(--magica-control-height) w-full min-w-max items-center justify-between gap-space-02"
@@ -90,9 +91,12 @@ export function IdeaGallery() {
             </TabsPrimitive.Trigger>
           ))}
         </TabsPrimitive.List>
-      </TabsPrimitive.Root>
+      </div>
 
-      <div className="mx-auto flex w-full flex-col items-center">
+      <TabsPrimitive.Content
+        value={tab}
+        className="mx-auto flex w-full flex-col items-center rounded-radius-l outline-none focus-visible:ring-2 focus-visible:ring-boarder-action"
+      >
         <ul className="w-full columns-2 gap-space-04 md:columns-3 md:gap-space-05">
           {ideas.map((idea) => (
             <li key={idea.title} className="mb-space-04 break-inside-avoid md:mb-space-05">
@@ -113,7 +117,7 @@ export function IdeaGallery() {
         >
           See more ideas
         </button>
-      </div>
-    </div>
+      </TabsPrimitive.Content>
+    </TabsPrimitive.Root>
   );
 }
