@@ -20,6 +20,22 @@ test("a chat URL loads the chat view, not the empty state", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "Your AI worker" })).toHaveCount(0);
 });
 
+test("mobile: no sideways page scroll, the composer is fully on screen, no focus zoom", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto("/chat");
+  const composer = page.getByRole("textbox", { name: "Message" });
+  await expect(composer).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+  const send = await page.getByRole("button", { name: "Send message" }).boundingBox();
+  expect(send && send.x + send.width).toBeLessThanOrEqual(360);
+  await expect(page.locator('meta[name="viewport"]')).toHaveAttribute(
+    "content",
+    /maximum-scale=1.*interactive-widget=resizes-content/,
+  );
+});
+
 test("mobile: the sidebar opens as a drawer", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/chat");
