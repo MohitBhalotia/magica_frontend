@@ -5,3 +5,8 @@ allowBuilds:
 # Our own contracts are consumed right after publishing; the release-age guard is for third parties.
 minimumReleaseAgeExclude:
   - "@mohitbhalotia/*"
+
+overrides:
+  # GHSA-96hv-2xvq-fx4p (high, memory-exhaustion DoS) via @trigger.dev/react-hooks → socket.io-client.
+  # shortcut: drop once @trigger.dev/core ships a patched ws itself.
+  ws@<8.21.0: ^8.21.0
