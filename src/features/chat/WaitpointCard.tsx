@@ -135,9 +135,15 @@ const TITLES: Record<WaitpointType, string> = {
   plan_approval: "Review the plan",
 };
 
+/** The backend's waitpoint TTL; a browser clock behind the server's would otherwise show 15:02. */
+const TTL_SECONDS = 15 * 60;
+/** Answers are ignored this long after the card appears, so a click or Enter already in flight can't answer it. */
+const ARM_AFTER_MS = 600;
+
 /** Seconds left until `expiresAt`, ticking every second. */
 function useSecondsLeft(expiresAt: string) {
-  const left = () => Math.max(0, Math.ceil((Date.parse(expiresAt) - Date.now()) / 1000));
+  const left = () =>
+    Math.min(TTL_SECONDS, Math.max(0, Math.ceil((Date.parse(expiresAt) - Date.now()) / 1000)));
   const [seconds, setSeconds] = useState(left);
   useEffect(() => {
     const timer = setInterval(() => {
@@ -165,8 +171,16 @@ export function WaitpointCard({ waitpoint }: { waitpoint: Waitpoint }) {
   });
   const seconds = useSecondsLeft(waitpoint.expiresAt);
   const card = useRef<HTMLDivElement>(null);
+  const [armed, setArmed] = useState(false);
+  // The card is keyed by waitpoint id, so this runs once per waitpoint.
   useEffect(() => {
     card.current?.focus();
+    const timer = setTimeout(() => {
+      setArmed(true);
+    }, ARM_AFTER_MS);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [waitpoint.id]);
 
   if (respond.isSuccess) return null;
@@ -201,7 +215,7 @@ export function WaitpointCard({ waitpoint }: { waitpoint: Waitpoint }) {
           answer={(response) => {
             respond.mutate(response);
           }}
-          disabled={respond.isPending}
+          disabled={!armed || respond.isPending}
         />
       )}
     </div>
