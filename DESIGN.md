@@ -365,7 +365,8 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
 | Schema | `wrench` (info-500) | Model schema | — | Model ID · `<id>` (open by default) |
 | Media generation | `sparkles` (icon-primary) + `image`/`video` 12px | AI Generation | — | Model, input media preview (max 384, radius 12), params (first 3 rows + **"View more"** link in info-500), output media |
 
-- **[Observed 2026-10-19]** A crop step is labelled **"Image crop"** (with its credits, `0.005M`), not "AI Generation". Every row shows its duration (`193ms`, `2.2s`), and the group header digit rolls ("Completed 7 steps").
+- **[Observed 2026-10-19]** A crop step is labelled **"Image crop"** (with its credits, `0.005M`), not "AI Generation". Rows show their duration (`193ms`, `2.2s`) after the status icon (lucide `clock` 10px, `text-text-secondary/40 text-caption tabular-nums`); billed rows (AI Generation, Image crop) show their credits instead, with no duration. The group header digit rolls ("Completed 7 steps").
+- **"View more" [TBV]:** the only reference media card seen (2 rows) has no "View more", so whether it turns into "View less" is unverified; ours expands and the link goes away.
 
 **Step status:**
 

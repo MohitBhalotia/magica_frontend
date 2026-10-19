@@ -43,7 +43,7 @@ export function AssistantParts({
   const blocks = toBlocks(parts);
   const reasoning = blocks.flatMap((b) => (b.type === "reasoning" ? [b.text] : [])).join("\n\n");
   const steps = blocks.filter((b) => b.type.startsWith("tool-")) as ToolBlock[];
-  const thinkingMs = MessageMetadataSchema.safeParse(metadata).data?.thinkingMs;
+  const { thinkingMs, toolMs } = MessageMetadataSchema.safeParse(metadata).data ?? {};
 
   // Before the first part arrives (DESIGN §4.6).
   if (streaming && !blocks.some((b) => b.type !== "step-start"))
@@ -66,7 +66,7 @@ export function AssistantParts({
           <ReasoningContent>{reasoning}</ReasoningContent>
         </Reasoning>
       )}
-      {steps.length > 0 && <ToolSteps steps={steps} streaming={streaming} />}
+      {steps.length > 0 && <ToolSteps steps={steps} streaming={streaming} toolMs={toolMs} />}
       {blocks.map((b, i) =>
         b.type === "text" ? (
           // Parts only ever append, so the index is a stable key.
