@@ -28,7 +28,7 @@ export function DuplicateTaskDialog({
         <Dialog.Content className={`${PANEL} w-[448px]`}>
           <div>
             <Dialog.Title className="text-small font-semibold">Duplicate task</Dialog.Title>
-            <Dialog.Description className="mt-space-02 text-small text-text-secondary">
+            <Dialog.Description className="mt-space-02 text-small wrap-anywhere text-text-secondary">
               Create an exact copy of the task “{title}” and all its messages.
             </Dialog.Description>
           </div>

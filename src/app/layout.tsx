@@ -1,5 +1,5 @@
 import { ClerkProvider } from "@clerk/nextjs";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Figtree } from "next/font/google";
 
 import { Providers } from "./Providers";
@@ -14,6 +14,17 @@ const figtree = Figtree({
 
 // The reference's name and favicon (src/app/favicon.ico), at the user's request.
 export const metadata: Metadata = { title: "Magica" };
+
+// maximumScale, as the reference does: iOS Safari zooms into a focused field under 16px (our
+// composer is 14px), pushing the composer and the end of the thread off-screen; pinch zoom still
+// works. resizes-content: the on-screen keyboard shrinks the h-dvh shell, so the composer stays
+// above it and the thread can still scroll to its last message (Android Chrome).
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  interactiveWidget: "resizes-content",
+};
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

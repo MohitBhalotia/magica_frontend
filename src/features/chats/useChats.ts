@@ -244,7 +244,12 @@ export function useUpdateChat() {
       queryClient.setQueryData(queryKey, context?.previous);
       showError(error);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+    // The open chat's title (tab title) and pin come from its own query too.
+    onSettled: (_data, _error, { id }) =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey }),
+        queryClient.invalidateQueries({ queryKey: chatKey(userId, id) }),
+      ]),
   });
 }
 

@@ -98,7 +98,12 @@ it("the pill shows the balance and opens the plan popover", async () => {
 
   expect(screen.getByText("Hobby")).toBeInTheDocument();
   expect(screen.getByText("Available Credits")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "View usage" })).toHaveAttribute("href", "/usage");
+  const usage = screen.getByRole("link", { name: "View usage" });
+  expect(usage).toHaveAttribute("href", "/usage");
+
+  // Following it closes the popover (the pill stays mounted on the next page).
+  await user.click(usage);
+  expect(screen.queryByText("Available Credits")).not.toBeInTheDocument();
 });
 
 it("/usage shows totals per tool, and a tool's runs in the detailed view", async () => {
