@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AssistantMessage, CopyAction, LiveTurn, Stamp } from "@/features/chat/AssistantTurn";
 import { Composer } from "@/features/chat/Composer";
 import { useChat } from "@/features/chats/useChats";
+import { MessageAttachments } from "@/features/uploads/MessageAttachments";
 import { ApiError } from "@/services/http";
 
 // Measured on the reference: messages 868px wide, the composer below them 900px (plus 16px gutters).
@@ -102,6 +103,7 @@ export function ChatThread({ id }: { id: string }) {
                   <div key={m.id} className="animate-chat-fade-in-up">
                     {m.role === "user" ? (
                       <div className="group/user flex flex-col items-end gap-1">
+                        <MessageAttachments attachments={m.attachments} />
                         {/* `user-message` scopes the reference's dark bubble colour (tokens.css). */}
                         <p className="user-message max-w-md rounded-radius-xxl bg-user-message px-space-05 py-[6px] text-small break-words whitespace-pre-wrap text-text-primary">
                           {m.text}

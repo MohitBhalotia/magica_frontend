@@ -165,6 +165,7 @@ export function useSendMessage(chatId: string) {
         createdAt: now,
         completedAt: now,
         runId: null,
+        attachments: [],
       };
       // Newest first, as the API pages them.
       queryClient.setQueryData<ChatDetail>(queryKey, (old) =>

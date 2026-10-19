@@ -31,6 +31,7 @@ const message = (patch: Partial<Message>): Message => ({
   createdAt: at,
   completedAt: at,
   runId: null,
+  attachments: [],
   ...patch,
 });
 
