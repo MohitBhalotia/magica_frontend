@@ -1,11 +1,12 @@
 "use client";
 
 import { Show, SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
-import { IconLayoutSidebar, IconSparkles2 } from "@tabler/icons-react";
+import { IconLayoutSidebar } from "@tabler/icons-react";
 import { Monitor } from "lucide-react";
 import { useParams } from "next/navigation";
 
 import { FilesButton } from "@/features/chat/FilesModal";
+import { CreditsPill } from "@/features/credits/CreditsPill";
 import { ModelSelector } from "@/features/shell/ModelSelector";
 import { notAvailable } from "@/features/shell/nav";
 import { cn } from "@/lib/utils";
@@ -50,16 +51,7 @@ export function TopBar() {
             <span className="hidden sm:inline">Computer</span>
           </button>
           {chatId && <FilesButton chatId={chatId} />}
-          {/* The balance and the plan popover arrive with credits (M4). */}
-          <button
-            type="button"
-            aria-label="Credits available. Click for plan details."
-            onClick={notAvailable}
-            className="inline-flex h-(--magica-credit-control) items-center gap-space-03 rounded-radius-max border border-boarder-tertiary bg-surface-main-background-2 px-space-04 py-space-02 transition-colors outline-none hover:bg-surface-primary focus-visible:ring-2 focus-visible:ring-boarder-action"
-          >
-            <IconSparkles2 className="size-(--magica-compact-icon-size) text-icon-primary" />
-            <span className="text-small whitespace-nowrap text-text-primary">–</span>
-          </button>
+          <CreditsPill />
         </Show>
         <Show when="signed-out">
           {/* Magica 101 is a reference page outside the brief (PRD §6.10): shown, inert. */}

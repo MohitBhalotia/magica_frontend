@@ -1,5 +1,6 @@
 "use client";
 
+import { IconCoin } from "@tabler/icons-react";
 import { Check, ChevronDown, CircleAlert, Copy, GitFork, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useState } from "react";
 
@@ -19,6 +20,7 @@ import { ToolSteps } from "@/features/chat/ToolSteps";
 import { useLiveTurn } from "@/features/chat/useLiveTurn";
 import { useRetryRun } from "@/features/chats/useChats";
 import { notAvailable } from "@/features/shell/nav";
+import { formatCredits } from "@/lib/credits";
 
 /** Message parts we can render. Live parts come off the wire, so they're checked like saved ones. */
 const toBlocks = (parts: readonly unknown[]) =>
@@ -119,6 +121,22 @@ export function Stamp({ at }: { at: string }) {
 
 /** Under a finished reply (DESIGN §4.5): Copy, Fork, Good, Bad, then the time. */
 function TurnFooter({ message }: { message: Message }) {
+  const spent = MessageMetadataSchema.safeParse(message.metadata).data?.creditsUsedMicro;
+  return (
+    <div className="flex flex-col gap-space-02">
+      {/* DESIGN §4.5: 10/12px, #585858, coin icon; only when the turn's tools spent credits. */}
+      {spent ? (
+        <p className="flex items-center gap-space-01 text-[10px] leading-3 text-icon-secondary">
+          <IconCoin className="size-3" />
+          {formatCredits(spent)} credits
+        </p>
+      ) : null}
+      <TurnActions message={message} />
+    </div>
+  );
+}
+
+function TurnActions({ message }: { message: Message }) {
   return (
     <MessageActions className="gap-0.5">
       <CopyAction text={message.text} />

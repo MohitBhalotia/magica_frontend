@@ -409,10 +409,21 @@ Each component lists its anatomy, its states, and the copy to use. Use shadcn pr
   - About 245px wide, radius 16, `--surface-primary` background, padding 16.
   - Copy (13px, `--text-secondary`): "Add a file from your device or select one from your library".
   - Then a full-width secondary button "🖼 Select Asset" and a primary black button "+ Upload". Both are h40 with radius 10.
-- **Credits popover:**
-  - About 300px wide, radius 16, `shadow-popover`, padding 16.
-  - Plan label "HOBBY" (caption caps, 600), then "Available Credits" with the balance (16px/700).
-  - Primary "Add Credits" (full width, h40), a caption-caps "EXPLORE PLANS" section, a "Compare plans / Find the right plan for you ↗" card, and chips "View usage" and "Billing details".
+- **Credits popover [Observed 2026-10-19, measured]:** opens below the pill, aligned to its end.
+  - Card: `flex w-[300px] flex-col gap-space-04 rounded-radius-xxxl bg-surface-main-background-3 p-space-default-padding border-(length:--border-width-s) border-boarder-tertiary shadow-popover`.
+  - Inner block (`px-space-04 py-space-04`, gap 16): the plan label "Hobby" (`text-xs font-semibold uppercase`), then a row "Available Credits" (`text-sm text-text-secondary`) with the balance right-aligned (`text-base font-bold`, "29.26M").
+  - "Add Credits": `h-9 w-full rounded-radius-max bg-surface-primary-active text-sm font-semibold text-text-on-action`, tabler `wallet` 16px.
+  - Two chips side by side (each `h-6 w-[130px] rounded-radius-xxl bg-surface-primary px-space-03 border-(length:--border-width-xs) border-boarder-tertiary text-xs`, label left, icon right): "View usage" (tabler `chart-bar`) and "Billing details" (tabler `coin`).
+  - The earlier "EXPLORE PLANS" / "Compare plans" section is gone.
+  - Pill: `inline-flex h-magica-credit gap-space-03 px-space-04 py-space-02 rounded-radius-max border-(length:--border-width-xs) border-boarder-tertiary bg-surface-main-background-2 hover:bg-surface-primary`; aria-label "Credits available: 29.26M. Click for plan details.".
+- **Usage page `/usage` [Observed 2026-10-19]** (screenshots `.playwright-mcp/ref-usage*.png`):
+  - Title "AI Credits Overview" (~32px bold), subtitle "Track your AI usage and optimize credit spend".
+  - Four stat cards in a row, each with an icon tile: "TOTAL DEBITED" ("0.74M credits"), "EXECUTIONS" (11), "CATEGORIES" (5), "PERIOD" ("Oct 17, 2026 - Oct 19, 2026").
+  - A filter bar: "Show [Debited Credits ▾]", "Period [Current Period ▾]", the date range right-aligned.
+  - A notice "Earlier usage is still available… Open Usage Old →" (reference-specific migration notice; not cloned).
+  - A segmented control "Overview | Detailed View".
+  - Overview: a table "Tool Name ⇅ | Total Debited ⇅ | Executions ⇅ | Latest Usage ▾ | Action", rows like "AI GPT Image 2 · 0.02M · 2 · 10/19/2026, 3:22:01 PM · [👁 View details]".
+  - Detailed View: "Detailed records / Select a usage category, then open a record to inspect step costs." with a category select ("AI GPT Image 2 - 0.02M"), then a card "AI GPT Image 2 usage executions / 2 executions in the selected period" with a "Debited" badge and a "Credits Used | Timestamp" list ("0.0076M · 10/19/2026, 3:22:01 PM").
 - **Task row menu:**
   - **[Observed 2026-10-18]** 180px wide, radius 10, padding 5, white, shadow `0 4px 12px rgba(0,0,0,.14)`. Items h32, radius 8, padding `0 9px`, gap 8, 14px `#5e5e5e` (the focused item is `--text-primary`); icons 16px at stroke 1.5.
   - Items: **Pin to top** (tabler `pin`) — or **Unpin** (tabler `pinned-off`) when pinned — **Rename** (tabler `pencil`), **Duplicate** (tabler `copy`), **Add to project** (lucide `folder-input`, ›), **Delete** (tabler `trash`, `#dc2626`).
