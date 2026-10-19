@@ -90,6 +90,7 @@ it("follows a live reply, then shows the saved message when the run ends", async
     status: "thinking" as const,
     triggerRunId: "run_1",
     publicAccessToken: "pk",
+    waitpoint: null,
   };
   const live: ChatDetail = {
     id: "c1",

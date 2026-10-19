@@ -17,6 +17,7 @@ import { Reasoning, ReasoningContent, ReasoningTrigger } from "@/components/ai-e
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { GeneratedMedia } from "@/features/chat/GeneratedMedia";
 import { ToolSteps } from "@/features/chat/ToolSteps";
+import { WaitpointCard } from "@/features/chat/WaitpointCard";
 import { useLiveTurn } from "@/features/chat/useLiveTurn";
 import { useRetryRun } from "@/features/chats/useChats";
 import { notAvailable } from "@/features/shell/nav";
@@ -200,6 +201,12 @@ export function AssistantMessage({
 
 /** The reply being written right now, followed live until its run ends. */
 export function LiveTurn({ chatId, run }: { chatId: string; run: RunHandle }) {
-  const message = useLiveTurn(chatId, run);
-  return <AssistantParts parts={message?.parts ?? []} metadata={message?.metadata} streaming />;
+  const { message, waitpoint } = useLiveTurn(chatId, run);
+  return (
+    <>
+      <AssistantParts parts={message?.parts ?? []} metadata={message?.metadata} streaming />
+      {/* Last in the thread, so it sits right above the composer (DESIGN §4.11). */}
+      {waitpoint && <WaitpointCard key={waitpoint.id} waitpoint={waitpoint} />}
+    </>
+  );
 }

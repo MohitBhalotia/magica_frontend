@@ -8,9 +8,12 @@ import { useEffect, useState } from "react";
 
 import {
   UI_STREAM,
+  WAITPOINT_METADATA_KEY,
+  WaitpointSchema,
   type ChatDetail,
   type MessageMetadata,
   type RunHandle,
+  type Waitpoint,
 } from "@mohitbhalotia/magica-contracts";
 
 import { chatKey, chatListKey } from "@/features/chats/useChats";
@@ -57,7 +60,7 @@ export function useLiveTurn(chatId: string, run: RunHandle) {
     // runs that long become common.
     timeoutInSeconds: 600,
   });
-  useRealtimeRun(run.triggerRunId ?? undefined, {
+  const { run: live } = useRealtimeRun(run.triggerRunId ?? undefined, {
     ...options,
     // The stream itself stays open ~60s after the run ends, so the run's status marks the end.
     onComplete: () => {
@@ -89,5 +92,11 @@ export function useLiveTurn(chatId: string, run: RunHandle) {
       current = false;
     };
   }, [parts]);
-  return message;
+
+  // The question the run is waiting on (PRD §5.8): live from the run's metadata, or, until the
+  // subscription has caught up (e.g. after a reload), from the handle the chat was loaded with.
+  const waitpoint: Waitpoint | null = live
+    ? (WaitpointSchema.safeParse(live.metadata?.[WAITPOINT_METADATA_KEY]).data ?? null)
+    : run.waitpoint;
+  return { message, waitpoint };
 }
