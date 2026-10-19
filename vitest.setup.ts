@@ -28,7 +28,8 @@ vi.mock("@clerk/nextjs", async () => {
       (when === "signed-in") === useAuth().isSignedIn ? children : null,
     SignInButton: ({ children }: { children?: ReactNode }) => children,
     SignUpButton: ({ children }: { children?: ReactNode }) => children,
-    UserButton: () => null,
+    // Clerk's custom menu entries hang off UserButton; the menu itself isn't rendered in tests.
+    UserButton: Object.assign(() => null, { MenuItems: () => null, Action: () => null }),
   };
 });
 

@@ -8,7 +8,11 @@ export function notAvailable() {
   toast("Not available in this build");
 }
 
-type NavItem = { label: string; Icon: ComponentType<{ className?: string }> };
+/** Our public API docs (Mintlify), as the reference's "API / MCP" opens its own docs. */
+export const DOCS_URL = "https://magica-ebc2eaac.mintlify.site/";
+
+/** `href` opens in a new tab; items without one are inert. */
+type NavItem = { label: string; Icon: ComponentType<{ className?: string }>; href?: string };
 
 /** Sidebar nav in reference order (DESIGN §3.2, §2.9). */
 export const NAV_ITEMS: readonly NavItem[] = [
@@ -16,7 +20,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: "Projects", Icon: FolderOpen },
   { label: "Library", Icon: IconBooks },
   { label: "Tools", Icon: Boxes },
-  { label: "API / MCP", Icon: IconApiBook },
+  { label: "API / MCP", Icon: IconApiBook, href: DOCS_URL },
   { label: "Help & Support", Icon: LifeBuoy },
   { label: "Unfair Advantage", Icon: Sparkles },
 ];

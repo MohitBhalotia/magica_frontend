@@ -8,6 +8,8 @@ type UiState = {
   setSidebarCollapsed: (collapsed: boolean) => void;
   searchOpen: boolean;
   setSearchOpen: (open: boolean) => void;
+  apiKeysOpen: boolean;
+  setApiKeysOpen: (open: boolean) => void;
 };
 
 export const useUiStore = create<UiState>()((set) => ({
@@ -22,5 +24,9 @@ export const useUiStore = create<UiState>()((set) => ({
   searchOpen: false,
   setSearchOpen: (searchOpen) => {
     set({ searchOpen });
+  },
+  apiKeysOpen: false,
+  setApiKeysOpen: (apiKeysOpen) => {
+    set({ apiKeysOpen });
   },
 }));

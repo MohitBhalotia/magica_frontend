@@ -173,8 +173,8 @@ importers:
         specifier: 7.9.15
         version: 7.9.15(next@16.4.2(@babel/core@7.29.7(supports-color@7.2.0))(@opentelemetry/api@1.9.1)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@mohitbhalotia/magica-contracts':
-        specifier: 0.10.0
-        version: 0.10.0(zod@4.6.7)
+        specifier: 0.11.0
+        version: 0.11.0(zod@4.6.7)
       '@radix-ui/react-use-controllable-state':
         specifier: 1.3.0
         version: 1.3.0(@types/react@19.3.0)(react@19.3.1)
@@ -943,8 +943,8 @@ packages:
   '@microsoft/fetch-event-source@2.0.1':
     resolution: {integrity: sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==}
 
-  '@mohitbhalotia/magica-contracts@0.10.0':
-    resolution: {integrity: sha512-NhQSJ2tIYEdq4zUkfCV2Rdv4qrlPP+bdyGQj2e01g52fs0AYqH+MhdntWudlJgkEQvdtCbHcMIaotTEzzC3keQ==, tarball: https://npm.pkg.github.com/download/@mohitbhalotia/magica-contracts/0.10.0/81ac4b5bc7460a821ab8e6f5c544ce747b648824}
+  '@mohitbhalotia/magica-contracts@0.11.0':
+    resolution: {integrity: sha512-E9Av5v5LWP+DhKqdUoLPIRRrrSilNN5XaQ5S3CLIqXeuX7XuMK9HzCWqePHugV0b44CbG3tjsI8is1CibvXb8g==, tarball: https://npm.pkg.github.com/download/@mohitbhalotia/magica-contracts/0.11.0/25a406c4c4ce18be509eece596f335b269c25d9f}
     peerDependencies:
       zod: ^4.6.0
 
@@ -5800,7 +5800,7 @@ snapshots:
 
   '@microsoft/fetch-event-source@2.0.1': {}
 
-  '@mohitbhalotia/magica-contracts@0.10.0(zod@4.6.7)':
+  '@mohitbhalotia/magica-contracts@0.11.0(zod@4.6.7)':
     dependencies:
       zod: 4.6.7
 
