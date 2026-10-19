@@ -113,7 +113,7 @@ function FilesDialog({ chatId }: { chatId: string }) {
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto px-5 pt-4 pb-2">
+      <div className="flex [scrollbar-width:none] gap-2 overflow-x-auto px-5 pt-4 pb-2">
         {FILTERS.map((chip) => {
           const count = assets.filter((asset) =>
             (chip.kinds as readonly string[]).includes(asset.kind),

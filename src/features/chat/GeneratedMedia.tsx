@@ -13,8 +13,8 @@ import { toolName } from "@/features/chat/ToolSteps";
 import { notAvailable } from "@/features/shell/nav";
 import { downloadFile } from "@/lib/download";
 
-/** DESIGN §4.7: a 384px box, radius 12, letterboxed on the primary surface. */
-const BOX = "relative w-96 overflow-hidden rounded-xl bg-surface-primary";
+/** DESIGN §4.7: a 384px box (narrower on phones), radius 12, letterboxed on the primary surface. */
+const BOX = "relative w-96 max-w-full overflow-hidden rounded-xl bg-surface-primary";
 const OVERLAY_BUTTON =
   "flex size-8 items-center justify-center rounded-full bg-surface-overlay-control text-white hover:bg-surface-overlay-control-hover";
 
