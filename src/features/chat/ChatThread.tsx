@@ -9,7 +9,7 @@ import {
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AssistantParts, LiveTurn } from "@/features/chat/AssistantTurn";
+import { AssistantMessage, LiveTurn } from "@/features/chat/AssistantTurn";
 import { Composer } from "@/features/chat/Composer";
 import { useChat } from "@/features/chats/useChats";
 import { ApiError } from "@/services/http";
@@ -89,7 +89,13 @@ export function ChatThread({ id }: { id: string }) {
                   ) : data.activeRun && (m.status === "streaming" || m.status === "pending") ? (
                     <LiveTurn key={m.id} chatId={id} run={data.activeRun} />
                   ) : (
-                    <AssistantParts key={m.id} parts={m.contentBlocks} metadata={m.metadata} />
+                    <AssistantMessage
+                      key={m.id}
+                      chatId={id}
+                      message={m}
+                      // Newest first from the API: only the latest reply can be retried.
+                      latest={m.id === data.messages.items[0]?.id}
+                    />
                   ),
                 )}
               </ConversationContent>

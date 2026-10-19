@@ -52,6 +52,13 @@ export const cancelRun = (runId: string, token: Token) =>
     token,
   });
 
+/** Retry the chat's latest failed or stopped reply: a new run on the same user message. */
+export const retryRun = (runId: string, token: Token) =>
+  request(`/api/v1/runs/${encodeURIComponent(runId)}/retry`, SendResponseSchema, {
+    method: "POST",
+    token,
+  });
+
 export const updateChat = (id: string, patch: UpdateChatRequest, token: Token) =>
   request(chatPath(id), ChatSummarySchema, { method: "PATCH", body: JSON.stringify(patch), token });
 

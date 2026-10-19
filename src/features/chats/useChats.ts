@@ -25,6 +25,7 @@ import {
   duplicateChat,
   getChat,
   listChats,
+  retryRun,
   searchChats,
   sendMessage,
   updateChat,
@@ -156,6 +157,17 @@ export function useStopRun(chatId: string) {
       );
     },
     onError: showError,
+  });
+}
+
+/** Retry a failed or stopped reply; the refetched chat brings the new reply and its run. */
+export function useRetryRun(chatId: string) {
+  const queryClient = useQueryClient();
+  const { userId, getToken } = useAuth();
+  return useMutation({
+    mutationFn: async (runId: string) => retryRun(runId, await getToken()),
+    onError: showError,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: chatKey(userId, chatId) }),
   });
 }
 

@@ -21,6 +21,7 @@ const message = (id: string, text: string) => ({
   errorMessage: null,
   createdAt: at,
   completedAt: at,
+  runId: null,
 });
 const chat: ChatDetail = {
   id: "c1",

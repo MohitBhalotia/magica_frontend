@@ -1,5 +1,6 @@
 import { useAuth } from "@clerk/nextjs";
 import { screen, waitFor } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { useRealtimeRun, useRealtimeStream } from "@trigger.dev/react-hooks";
 import type { UIMessageChunk } from "ai";
 import { http, HttpResponse } from "msw";
@@ -7,7 +8,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 
 import type { ChatDetail, Message } from "@mohitbhalotia/magica-contracts";
 
-import { AssistantParts } from "@/features/chat/AssistantTurn";
+import { AssistantMessage, AssistantParts } from "@/features/chat/AssistantTurn";
 import { ChatThread } from "@/features/chat/ChatThread";
 import { server } from "@/mocks/server";
 import { API, renderWithProviders } from "@/test/render";
@@ -29,6 +30,7 @@ const message = (patch: Partial<Message>): Message => ({
   errorMessage: null,
   createdAt: at,
   completedAt: at,
+  runId: null,
   ...patch,
 });
 
@@ -64,7 +66,7 @@ it("renders a saved reply: Markdown text and collapsed reasoning with its thinki
   // Rendered as Markdown: bold text, no literal asterisks.
   expect(screen.getByText("there")).toBeInTheDocument();
   expect(screen.queryByText(/\*\*/)).not.toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /Thought for 3 seconds/ })).toHaveAttribute(
+  expect(screen.getByRole("button", { name: /Thought for 3s/ })).toHaveAttribute(
     "aria-expanded",
     "false",
   );
@@ -151,4 +153,74 @@ it("follows a live reply, then shows the saved message when the run ends", async
   await waitFor(() => {
     expect(screen.getByText("Saved answer")).toBeInTheDocument();
   });
+});
+
+it("a finished reply has the footer, and Copy copies its text", async () => {
+  const user = userEvent.setup();
+  renderWithProviders(
+    <AssistantMessage
+      chatId="c1"
+      latest
+      message={message({ text: "Copy me", contentBlocks: [{ type: "text", text: "Copy me" }] })}
+    />,
+  );
+  for (const name of ["Fork chat", "Good response", "Bad response"])
+    expect(screen.getByRole("button", { name })).toBeInTheDocument();
+
+  await user.click(screen.getByRole("button", { name: "Copy" }));
+  expect(await navigator.clipboard.readText()).toBe("Copy me");
+  expect(screen.getByRole("button", { name: "Copied" })).toBeInTheDocument();
+});
+
+it("a failed latest reply keeps its partial text, shows the safe error and retries its run", async () => {
+  const retried: string[] = [];
+  server.use(
+    http.post(`${API}/runs/:runId/retry`, ({ params }) => {
+      retried.push(String(params.runId));
+      return HttpResponse.json(
+        {
+          chatId: "c1",
+          userMessageId: "u1",
+          assistantMessageId: "a2",
+          run: { runId: "r2", status: "queued", triggerRunId: null, publicAccessToken: null },
+        },
+        { status: 201 },
+      );
+    }),
+  );
+  renderWithProviders(
+    <AssistantMessage
+      chatId="c1"
+      latest
+      message={message({
+        status: "failed",
+        runId: "r1",
+        contentBlocks: [{ type: "text", text: "Half an answer" }],
+        errorCode: "MODEL_UNAVAILABLE",
+        errorMessage: "Free models are busy right now. Try again in a minute.",
+      })}
+    />,
+  );
+  expect(screen.getByText("Half an answer")).toBeInTheDocument();
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "Something went wrong — Free models are busy right now. Try again in a minute.",
+  );
+  expect(screen.queryByRole("button", { name: "Copy" })).not.toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+  await waitFor(() => {
+    expect(retried).toEqual(["r1"]);
+  });
+});
+
+it("a stopped reply reads Stopped; an older one can't be retried", () => {
+  renderWithProviders(
+    <AssistantMessage
+      chatId="c1"
+      latest={false}
+      message={message({ status: "cancelled", runId: "r1" })}
+    />,
+  );
+  expect(screen.getByText("Stopped")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Retry" })).not.toBeInTheDocument();
 });

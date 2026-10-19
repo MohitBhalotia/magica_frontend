@@ -2,7 +2,7 @@
 
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { code } from "@streamdown/code";
-import { BrainIcon, ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import {
   createContext,
@@ -142,14 +142,11 @@ export type ReasoningTriggerProps = ComponentProps<typeof CollapsibleTrigger> & 
   getThinkingMessage?: (isStreaming: boolean, duration?: number) => ReactNode;
 };
 
+// Copy follows the reference's "⌄ Thinking" row (DESIGN §4.6); the finished wording is [TBV].
 const defaultGetThinkingMessage = (isStreaming: boolean, duration?: number) => {
-  if (isStreaming || duration === 0) {
-    return <Shimmer duration={1}>Thinking...</Shimmer>;
-  }
-  if (duration === undefined) {
-    return <p>Thought for a few seconds</p>;
-  }
-  return <p>Thought for {duration} seconds</p>;
+  if (isStreaming || duration === 0) return <Shimmer duration={1}>Thinking</Shimmer>;
+  if (duration === undefined) return <p>Thought for a few seconds</p>;
+  return <p>Thought for {duration}s</p>;
 };
 
 export const ReasoningTrigger = memo(
@@ -164,18 +161,17 @@ export const ReasoningTrigger = memo(
     return (
       <CollapsibleTrigger
         className={cn(
-          "flex w-full items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground",
+          "flex w-fit items-center gap-space-02 text-small text-text-secondary transition-colors hover:text-text-primary",
           className,
         )}
         {...props}
       >
         {children ?? (
           <>
-            <BrainIcon className="size-4" />
-            {getThinkingMessage(isStreaming, duration)}
             <ChevronDownIcon
-              className={cn("size-4 transition-transform", isOpen ? "rotate-180" : "rotate-0")}
+              className={cn("size-3 transition-transform", isOpen ? "rotate-0" : "-rotate-90")}
             />
+            {getThinkingMessage(isStreaming, duration)}
           </>
         )}
       </CollapsibleTrigger>
@@ -193,8 +189,8 @@ const streamdownPlugins = { code };
 export const ReasoningContent = memo(({ className, children, ...props }: ReasoningContentProps) => (
   <CollapsibleContent
     className={cn(
-      "mt-4 text-sm",
-      "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 data-[state=closed]:animate-out data-[state=open]:animate-in text-muted-foreground outline-none",
+      "mt-space-03 border-l border-boarder-tertiary pl-space-04 text-small text-text-secondary",
+      "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 data-[state=closed]:animate-out data-[state=open]:animate-in outline-none",
       className,
     )}
     {...props}
