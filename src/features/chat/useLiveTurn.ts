@@ -50,6 +50,8 @@ export function useLiveTurn(chatId: string, run: RunHandle) {
   const { parts } = useRealtimeStream<UIMessageChunk>(run.triggerRunId ?? "", UI_STREAM, {
     ...options,
     throttleInMs: 50,
+    // A Magica step can wait up to 15 minutes in silence (DEC-054); the default 60s would drop it.
+    timeoutInSeconds: 15 * 60,
   });
   useRealtimeRun(run.triggerRunId ?? undefined, {
     ...options,

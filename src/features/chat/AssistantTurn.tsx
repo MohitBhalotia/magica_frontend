@@ -8,11 +8,14 @@ import {
   MessageMetadataSchema,
   type Message,
   type RunHandle,
+  type ToolBlock,
 } from "@mohitbhalotia/magica-contracts";
 
 import { MessageAction, MessageActions, MessageResponse } from "@/components/ai-elements/message";
 import { Reasoning, ReasoningContent, ReasoningTrigger } from "@/components/ai-elements/reasoning";
 import { Shimmer } from "@/components/ai-elements/shimmer";
+import { GeneratedMedia } from "@/features/chat/GeneratedMedia";
+import { ToolSteps } from "@/features/chat/ToolSteps";
 import { useLiveTurn } from "@/features/chat/useLiveTurn";
 import { useRetryRun } from "@/features/chats/useChats";
 import { notAvailable } from "@/features/shell/nav";
@@ -39,6 +42,7 @@ export function AssistantParts({
 }) {
   const blocks = toBlocks(parts);
   const reasoning = blocks.flatMap((b) => (b.type === "reasoning" ? [b.text] : [])).join("\n\n");
+  const steps = blocks.filter((b) => b.type.startsWith("tool-")) as ToolBlock[];
   const thinkingMs = MessageMetadataSchema.safeParse(metadata).data?.thinkingMs;
 
   // Before the first part arrives (DESIGN §4.6).
@@ -62,6 +66,7 @@ export function AssistantParts({
           <ReasoningContent>{reasoning}</ReasoningContent>
         </Reasoning>
       )}
+      {steps.length > 0 && <ToolSteps steps={steps} streaming={streaming} />}
       {blocks.map((b, i) =>
         b.type === "text" ? (
           // Parts only ever append, so the index is a stable key.
@@ -70,6 +75,7 @@ export function AssistantParts({
           </MessageResponse>
         ) : null,
       )}
+      <GeneratedMedia steps={steps} streaming={streaming} />
     </div>
   );
 }
