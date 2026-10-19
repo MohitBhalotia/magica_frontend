@@ -14,6 +14,7 @@ import {
 } from "@mohitbhalotia/magica-contracts";
 
 import { chatKey, chatListKey } from "@/features/chats/useChats";
+import { creditsKey } from "@/features/credits/useCredits";
 
 export type LiveMessage = UIMessage<MessageMetadata>;
 
@@ -63,6 +64,8 @@ export function useLiveTurn(chatId: string, run: RunHandle) {
       const refresh = () => {
         void queryClient.invalidateQueries({ queryKey: chatKey(userId, chatId) });
         void queryClient.invalidateQueries({ queryKey: chatListKey(userId) });
+        // The turn's tools may have spent credits: the pill and /usage refetch.
+        void queryClient.invalidateQueries({ queryKey: creditsKey(userId) });
       };
       refresh();
       // A chat's first reply is followed by chat-title, which can take 2–20s on a busy free model:
