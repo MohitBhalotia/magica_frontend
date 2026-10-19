@@ -76,6 +76,9 @@ export function Composer({ chatId, activeRun }: { chatId?: string; activeRun?: R
   const send = () => {
     // One reply at a time: Enter waits until the current one is done (the server enforces it too).
     if (empty || waitingForFiles || mutation.isPending || activeRun) return;
+    // Clerk is still loading (undefined): don't treat a signed-in user as signed out. Clerk hides
+    // the sign-in modal for a signed-in user, so the send would silently go nowhere.
+    if (isSignedIn === undefined) return;
     if (!isSignedIn) {
       openSignIn();
       return;

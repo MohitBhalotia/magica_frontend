@@ -12,8 +12,8 @@ If this repo sits inside the planning workspace, also read `../AGENTS.md` and `.
 | Install | `pnpm install` |
 | Dev | `pnpm dev` |
 | Typecheck / lint / test | `pnpm typecheck` · `pnpm lint` · `pnpm test` |
-| E2E (Playwright) | `pnpm test:e2e` |
-| Live E2E vs real providers (spends credits — ask first) | `pnpm test:e2e:live` |
+| E2E, signed out (smoke + axe, local build) | `pnpm test:e2e` |
+| E2E journeys, signed in as the Clerk e2e user (free model only; set `E2E_BASE_URL`) | `pnpm test:e2e:journeys` |
 | Add shadcn component | `pnpm dlx shadcn@latest add <component>` |
 
 Required before every commit: `pnpm typecheck && pnpm lint && pnpm test`.

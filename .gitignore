@@ -14,6 +14,8 @@
 /coverage
 /test-results/
 /playwright-report/
+# the e2e user's signed-in session
+/playwright/.clerk/
 
 # next.js
 /.next/
