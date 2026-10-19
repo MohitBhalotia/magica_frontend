@@ -3,7 +3,7 @@
 import { MessageCircle, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Dialog } from "radix-ui";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useChatList, useChatSearch } from "@/features/chats/useChats";
 import { cn } from "@/lib/utils";
@@ -32,12 +32,24 @@ function Highlight({ text, q }: { text: string; q: string }): ReactNode {
 export function SearchDialog() {
   const open = useUiStore((s) => s.searchOpen);
   const setOpen = useUiStore((s) => s.setSearchOpen);
+  // Opened by ⌘K there's no trigger to return focus to, so it goes back where the user was.
+  const returnTo = useRef<HTMLElement | null>(null);
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-surface-overlay-control backdrop-blur-[3px]" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 z-50 flex h-[370px] w-[512px] max-w-[calc(100vw-32px)] -translate-1/2 flex-col overflow-hidden rounded-radius-xxxxl bg-surface-main-background shadow-lg outline-none">
+        <Dialog.Content
+          onOpenAutoFocus={() => {
+            returnTo.current = document.activeElement as HTMLElement | null;
+          }}
+          onCloseAutoFocus={(event) => {
+            if (!returnTo.current?.isConnected) return;
+            event.preventDefault();
+            returnTo.current.focus();
+          }}
+          className="fixed top-1/2 left-1/2 z-50 flex h-[370px] w-[512px] max-w-[calc(100vw-32px)] -translate-1/2 flex-col overflow-hidden rounded-radius-xxxxl bg-surface-main-background shadow-lg outline-none"
+        >
           <Dialog.Title className="sr-only">Search tasks</Dialog.Title>
           <Dialog.Description className="sr-only">
             Search your recent tasks and open an existing task or start a new one.

@@ -43,7 +43,7 @@ The design system and UI behaviour spec for `magica_frontend`. Its goal is **pix
 | `--surface-disabled` | `#f7f7f7` | `#1b1b1b` |
 | `--text-primary` | `#1b1b1b` | `#f1f1f1` |
 | `--text-secondary` | `#585858` | `#9a9a9a` |
-| `--text-tertiary` | `#777777` | `#626262` |
+| `--text-tertiary` | `#707070` (reference `#777777`, see below) | `#626262` |
 | `--text-disabled` | `#bdbdbd` | `#626262` |
 | `--icon-primary` | `#343434` | `#f1f1f1` |
 | `--icon-secondary` | `#585858` | `#9a9a9a` |
@@ -513,7 +513,7 @@ The URL changes to `/chat/<id>` without a full reload, and the document title be
 ### 5.4 Accessibility
 - Icon buttons have `aria-label` text matching the reference: "Attach files", "Connect apps", "Dictation", "Send message", "View all files in this task", "Credits available: 29.95M. Click for plan details.", "Chat actions", "Copy", "Fork chat", "Good response", "Bad response", "Use as reference", "Download".
 - The step counter has `aria-label="<N>"`. Run status changes are announced in an `aria-live="polite"` region ("Thinking", "Working, 3 steps", "Completed", "Failed: …").
-- Contrast: `--text-tertiary` `#777` on white is 4.48:1. Use it only for caption-size metadata the reference also uses it for; never for actionable text.
+- Contrast: the reference's `--text-tertiary` `#777` on white is 4.48:1 (4.2:1 on the `#f7f7f7` panels), under AA, so ours is `#707070` (4.95:1 on white, 4.62:1 on `#f7f7f7`; user call 2026-10-19, PRD §14). Use it only for caption-size metadata the reference also uses it for; never for actionable text.
 - `prefers-reduced-motion` disables the shimmer, the digit roll and fade-ups (instant swap instead).
 
 ### 5.5 Responsive [Observed partially]

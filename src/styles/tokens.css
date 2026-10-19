@@ -11,7 +11,9 @@
   --surface-disabled: #f7f7f7;
   --text-primary: #1b1b1b;
   --text-secondary: #585858;
-  --text-tertiary: #777777;
+  /* Reference #777777 fails AA (4.48:1 on white, 4.2:1 on #f7f7f7); #707070 is the closest that
+     passes on both (PRD §14). */
+  --text-tertiary: #707070;
   --text-disabled: #bdbdbd;
   --icon-primary: #343434;
   --icon-secondary: #585858;

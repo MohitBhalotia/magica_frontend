@@ -61,11 +61,11 @@ export const sendMessage = (chatId: string, body: SendMessageRequest, token: Tok
     token,
   });
 
-/** Stop a reply. Idempotent; a reply that already ended comes back as it is. */
 /** A run's status, a fresh read token and any question it's waiting on (reload, Realtime down). */
 export const getRun = (runId: string, token: Token) =>
   request(`/api/v1/runs/${encodeURIComponent(runId)}`, RunHandleSchema, { token });
 
+/** Stop a reply. Idempotent; a reply that already ended comes back as it is. */
 export const cancelRun = (runId: string, token: Token) =>
   request(`/api/v1/runs/${encodeURIComponent(runId)}/cancel`, RunHandleSchema, {
     method: "POST",
