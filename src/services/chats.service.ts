@@ -4,9 +4,10 @@ import {
   ChatDetailSchema,
   ChatListSchema,
   ChatSummarySchema,
-  CreateChatResponseSchema,
+  RunHandleSchema,
   SearchResultListSchema,
-  type CreateChatRequest,
+  SendResponseSchema,
+  type SendMessageRequest,
   type UpdateChatRequest,
 } from "@mohitbhalotia/magica-contracts";
 
@@ -28,11 +29,33 @@ export const searchChats = (q: string, token: Token) =>
 export const getChat = (id: string, token: Token) =>
   request(chatPath(id), ChatDetailSchema, { token });
 
-/** Idempotent: resending the same clientMessageId returns the same chat. */
-export const createChat = (body: CreateChatRequest, token: Token) =>
-  request("/api/v1/chats", CreateChatResponseSchema, {
+/** First message: the chat, the message and the run answering it. Idempotent per clientMessageId. */
+export const createChat = (body: SendMessageRequest, token: Token) =>
+  request("/api/v1/chats", SendResponseSchema, {
     method: "POST",
     body: JSON.stringify(body),
+    token,
+  });
+
+/** A follow-up in an existing chat. 409 RUN_ACTIVE while a reply is still being written. */
+export const sendMessage = (chatId: string, body: SendMessageRequest, token: Token) =>
+  request(`${chatPath(chatId)}/messages`, SendResponseSchema, {
+    method: "POST",
+    body: JSON.stringify(body),
+    token,
+  });
+
+/** Stop a reply. Idempotent; a reply that already ended comes back as it is. */
+export const cancelRun = (runId: string, token: Token) =>
+  request(`/api/v1/runs/${encodeURIComponent(runId)}/cancel`, RunHandleSchema, {
+    method: "POST",
+    token,
+  });
+
+/** Retry the chat's latest failed or stopped reply: a new run on the same user message. */
+export const retryRun = (runId: string, token: Token) =>
+  request(`/api/v1/runs/${encodeURIComponent(runId)}/retry`, SendResponseSchema, {
+    method: "POST",
     token,
   });
 

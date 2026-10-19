@@ -11,19 +11,24 @@ import {
 import { toast } from "sonner";
 
 import type {
+  ChatDetail,
   ChatList,
   ChatSummary,
-  CreateChatRequest,
+  Message,
+  SendMessageRequest,
   UpdateChatRequest,
 } from "@mohitbhalotia/magica-contracts";
 
 import {
+  cancelRun,
   createChat,
   deleteChat,
   duplicateChat,
   getChat,
   listChats,
+  retryRun,
   searchChats,
+  sendMessage,
   updateChat,
 } from "@/services/chats.service";
 import { ApiError } from "@/services/http";
@@ -63,11 +68,14 @@ export function useChatSearch(q: string) {
   });
 }
 
+export const chatKey = (userId: string | null | undefined, id: string) =>
+  ["chat", userId, id] as const;
+
 /** One chat with its newest messages. A 404 is final, so it isn't retried. */
 export function useChat(id: string) {
   const { isSignedIn, userId, getToken } = useAuth();
   return useQuery({
-    queryKey: ["chat", userId, id],
+    queryKey: chatKey(userId, id),
     queryFn: async () => getChat(id, await getToken()),
     enabled: isSignedIn === true,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 3,
@@ -84,7 +92,7 @@ export function useCreateChat() {
   const { userId, getToken } = useAuth();
   const queryKey = chatListKey(userId);
   return useMutation({
-    mutationFn: async (body: CreateChatRequest) => createChat(body, await getToken()),
+    mutationFn: async (body: SendMessageRequest) => createChat(body, await getToken()),
     onMutate: async ({ clientMessageId }) => {
       await queryClient.cancelQueries({ queryKey });
       const previous = queryClient.getQueryData<Pages>(queryKey);
@@ -114,6 +122,83 @@ export function useCreateChat() {
       showError(error);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  });
+}
+
+/**
+ * A follow-up message. The user's bubble shows at once and is removed again if the server says
+ * no (e.g. RUN_ACTIVE, with a toast); the refetched chat then brings the stored message, the
+ * reply's placeholder and the run to follow live (`activeRun`).
+ */
+export function useSendMessage(chatId: string) {
+  const queryClient = useQueryClient();
+  const { userId, getToken } = useAuth();
+  const queryKey = chatKey(userId, chatId);
+  return useMutation({
+    mutationFn: async (body: SendMessageRequest) => sendMessage(chatId, body, await getToken()),
+    onMutate: async ({ clientMessageId, text }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<ChatDetail>(queryKey);
+      const now = new Date().toISOString();
+      const bubble: Message = {
+        id: clientMessageId,
+        role: "user",
+        status: "success",
+        text,
+        contentBlocks: [],
+        metadata: null,
+        errorCode: null,
+        errorMessage: null,
+        createdAt: now,
+        completedAt: now,
+        runId: null,
+      };
+      // Newest first, as the API pages them.
+      queryClient.setQueryData<ChatDetail>(queryKey, (old) =>
+        old
+          ? { ...old, messages: { ...old.messages, items: [bubble, ...old.messages.items] } }
+          : old,
+      );
+      return { previous };
+    },
+    onError: (error, _body, context) => {
+      queryClient.setQueryData(queryKey, context?.previous);
+      showError(error);
+    },
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey }),
+        queryClient.invalidateQueries({ queryKey: chatListKey(userId) }),
+      ]),
+  });
+}
+
+/**
+ * Stop the chat's reply. The handle comes back as `stopping`; the live turn sees the run end
+ * (its partial answer saved as cancelled) and refetches the chat.
+ */
+export function useStopRun(chatId: string) {
+  const queryClient = useQueryClient();
+  const { userId, getToken } = useAuth();
+  return useMutation({
+    mutationFn: async (runId: string) => cancelRun(runId, await getToken()),
+    onSuccess: (run) => {
+      queryClient.setQueryData<ChatDetail>(chatKey(userId, chatId), (old) =>
+        old?.activeRun ? { ...old, activeRun: { ...old.activeRun, status: run.status } } : old,
+      );
+    },
+    onError: showError,
+  });
+}
+
+/** Retry a failed or stopped reply; the refetched chat brings the new reply and its run. */
+export function useRetryRun(chatId: string) {
+  const queryClient = useQueryClient();
+  const { userId, getToken } = useAuth();
+  return useMutation({
+    mutationFn: async (runId: string) => retryRun(runId, await getToken()),
+    onError: showError,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: chatKey(userId, chatId) }),
   });
 }
 

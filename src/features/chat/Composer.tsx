@@ -2,14 +2,14 @@
 
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { IconPlug } from "@tabler/icons-react";
-import { ArrowUp, Folder, Loader2, Mic, Paperclip } from "lucide-react";
+import { ArrowUp, Folder, Loader2, Mic, Paperclip, Square } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 
-import { MAX_MESSAGE_LENGTH } from "@mohitbhalotia/magica-contracts";
+import { MAX_MESSAGE_LENGTH, type RunHandle } from "@mohitbhalotia/magica-contracts";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useCreateChat } from "@/features/chats/useChats";
+import { useCreateChat, useSendMessage, useStopRun } from "@/features/chats/useChats";
 import { notAvailable } from "@/features/shell/nav";
 import { cn } from "@/lib/utils";
 import { NEW_CHAT, useComposerStore } from "@/stores/composerStore";
@@ -33,16 +33,22 @@ function Action({ label, children }: { label: string; children: ReactNode }) {
 }
 
 /**
- * The empty-state composer (DESIGN §4.2, observed 2026-10-18). Enter sends, Shift+Enter adds a
- * line. Send creates the chat with its first message, then opens it; signed out, it asks to sign in.
+ * The composer (DESIGN §4.2, observed 2026-10-18). Enter sends, Shift+Enter adds a line; signed
+ * out, it asks to sign in. Without `chatId` (empty state) Send creates the chat with its first
+ * message and opens it; inside a chat it sends a follow-up, and while a reply is being written
+ * Send becomes Stop (the textarea stays editable).
  */
-export function Composer() {
+export function Composer({ chatId, activeRun }: { chatId?: string; activeRun?: RunHandle | null }) {
   const router = useRouter();
   const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
-  const text = useComposerStore((s) => s.drafts[NEW_CHAT] ?? "");
+  const draftKey = chatId ?? NEW_CHAT;
+  const text = useComposerStore((s) => s.drafts[draftKey] ?? "");
   const setDraft = useComposerStore((s) => s.setDraft);
-  const create = useCreateChat();
+  const createChat = useCreateChat();
+  const reply = useSendMessage(chatId ?? "");
+  const mutation = chatId ? reply : createChat;
+  const stop = useStopRun(chatId ?? "");
   const textarea = useRef<HTMLTextAreaElement>(null);
   // Reused until the send succeeds or the text changes, so a retry can't create a second chat.
   const clientMessageId = useRef<string | null>(null);
@@ -61,29 +67,49 @@ export function Composer() {
 
   const empty = text.trim() === "";
   const send = () => {
-    if (empty || create.isPending) return;
+    // One reply at a time: Enter waits until the current one is done (the server enforces it too).
+    if (empty || mutation.isPending || activeRun) return;
     if (!isSignedIn) {
       openSignIn();
       return;
     }
     clientMessageId.current ??= crypto.randomUUID();
-    create.mutate(
+    mutation.mutate(
       { clientMessageId: clientMessageId.current, text: text.trim() },
       {
-        onSuccess: ({ chatId }) => {
+        onSuccess: (sent) => {
           clientMessageId.current = null;
-          setDraft(NEW_CHAT, "");
-          router.push(`/chat/${chatId}`);
+          setDraft(draftKey, "");
+          if (!chatId) router.push(`/chat/${sent.chatId}`);
         },
       },
     );
   };
 
+  const stopping = activeRun?.status === "stopping" || stop.isPending;
+  const stopButton = activeRun && (
+    <button
+      type="button"
+      aria-label="Stop"
+      disabled={stopping}
+      onClick={() => {
+        stop.mutate(activeRun.runId);
+      }}
+      className="flex size-(--magica-composer-action-control) shrink-0 items-center justify-center rounded-radius-max bg-(--alias-error-a100) text-[#dc2626] transition-opacity outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-boarder-action"
+    >
+      {stopping ? (
+        <Loader2 className="size-(--magica-icon-size) animate-spin" />
+      ) : (
+        <Square className="size-3 fill-current" />
+      )}
+    </button>
+  );
+
   const sendButton = (
     <button
       type="button"
       aria-label="Send message"
-      disabled={empty || create.isPending}
+      disabled={empty || mutation.isPending}
       onClick={send}
       className={cn(
         "flex size-(--magica-composer-action-control) shrink-0 items-center justify-center rounded-radius-max transition-all outline-none focus-visible:ring-2 focus-visible:ring-boarder-action [&_svg]:size-(--magica-icon-size)",
@@ -92,7 +118,7 @@ export function Composer() {
           : "bg-surface-primary-active text-text-on-action hover:opacity-90",
       )}
     >
-      {create.isPending ? <Loader2 className="animate-spin" /> : <ArrowUp />}
+      {mutation.isPending ? <Loader2 className="animate-spin" /> : <ArrowUp />}
     </button>
   );
 
@@ -107,15 +133,15 @@ export function Composer() {
         ref={textarea}
         rows={1}
         aria-label="Message"
-        placeholder="Assign a task or ask anything..."
+        placeholder={chatId ? "Send a message..." : "Assign a task or ask anything..."}
         maxLength={MAX_MESSAGE_LENGTH}
         value={text}
-        // The empty state exists to take a prompt; the reference focuses it too.
+        // The composer is the page's main input; the reference focuses it too.
         // eslint-disable-next-line jsx-a11y/no-autofocus
         autoFocus
         onChange={(e) => {
           clientMessageId.current = null;
-          setDraft(NEW_CHAT, e.target.value);
+          setDraft(draftKey, e.target.value);
         }}
         onKeyDown={(e) => {
           // Enter while an IME is composing confirms the candidate; it must not send.
@@ -131,15 +157,18 @@ export function Composer() {
           <Action label="Attach files">
             <Paperclip />
           </Action>
-          <button
-            type="button"
-            aria-label="Choose project"
-            onClick={notAvailable}
-            className="flex h-(--magica-composer-action-control) max-w-56 min-w-0 shrink items-center gap-space-02 rounded-radius-max px-space-03 text-small font-medium text-text-secondary transition-colors outline-none hover:bg-surface-main-background-2 focus-visible:ring-2 focus-visible:ring-boarder-action"
-          >
-            <Folder className="size-(--magica-icon-size) shrink-0" />
-            <span className="truncate">Choose project</span>
-          </button>
+          {/* The reference offers projects only when starting a task, not inside one. */}
+          {!chatId && (
+            <button
+              type="button"
+              aria-label="Choose project"
+              onClick={notAvailable}
+              className="flex h-(--magica-composer-action-control) max-w-56 min-w-0 shrink items-center gap-space-02 rounded-radius-max px-space-03 text-small font-medium text-text-secondary transition-colors outline-none hover:bg-surface-main-background-2 focus-visible:ring-2 focus-visible:ring-boarder-action"
+            >
+              <Folder className="size-(--magica-icon-size) shrink-0" />
+              <span className="truncate">Choose project</span>
+            </button>
+          )}
           <Action label="Connect apps">
             <IconPlug className="-rotate-45" />
           </Action>
@@ -148,19 +177,20 @@ export function Composer() {
           <Action label="Dictation">
             <Mic />
           </Action>
-          {empty ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                {/* A disabled button gets no pointer events, so the tooltip hangs on a wrapper. */}
-                <span aria-label="Add a message first" className="inline-flex">
-                  {sendButton}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Add a message first</TooltipContent>
-            </Tooltip>
-          ) : (
-            sendButton
-          )}
+          {stopButton ??
+            (empty ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {/* A disabled button gets no pointer events, so the tooltip hangs on a wrapper. */}
+                  <span aria-label="Add a message first" className="inline-flex">
+                    {sendButton}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Add a message first</TooltipContent>
+              </Tooltip>
+            ) : (
+              sendButton
+            ))}
         </div>
       </div>
     </div>
